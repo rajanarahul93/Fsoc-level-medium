@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 DevDash: FSOC  Challenge 🚀
+# 🚀  FSOC Medium Challenge 🚀
 
 **A beginner-friendly project to help you make your first pull request and learn the basics of web development and open-source contribution.**
 
