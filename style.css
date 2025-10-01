@@ -114,7 +114,9 @@ nav {
     font-size: 1rem;
 }
 
-button {
+
+button,
+#add-task-btn {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 8px;
@@ -122,7 +124,20 @@ button {
     color: white;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.1s, filter 0.1s;
+}
+
+
+button:hover,
+#add-task-btn:hover {
+    background-color: var(--primary-hover-color);
+}
+
+
+button:active,
+#add-task-btn:active {
+    transform: scale(0.96);
+    filter: brightness(0.95);
 }
 
 .task-filters {
