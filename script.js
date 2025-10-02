@@ -216,6 +216,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Adding Task With Enter
+        taskInput.addEventListener('keypress',(e)=>{
+            if (e.key=="Enter"){
+                addTask();   
+            }
+        })
+
     // --- Block H: Application Entry Point ---
     function init() {
         renderTasks();
