@@ -58,11 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  function toggleTaskCompletion(index) {
-    tasks[index].completed = !tasks[index].completed
-    renderTasks()
-  }
-
 
   function enableInlineEdit(index, spanEl) {
     const originalText = tasks[index].text
