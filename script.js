@@ -14,6 +14,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let tasks = [];
     let weatherSearchTimeout = null;
 
+    // --- Block B2: Local Storage Functions ---
+    function saveTasks() {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+        const storedTasks = localStorage.getItem("tasks");
+        if (storedTasks) {
+            tasks = JSON.parse(storedTasks);
+        }
+    }
+
     // --- Block C: Service Configuration ---
     const weatherApiKey = "YOUR_API_KEY_HERE";
     const DEBOUNCE_DELAY = 500; // 500ms delay
@@ -34,12 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
         taskList.innerHTML = "";
 
         if (tasks.length === 0) {
-            const empty = document.createElement("li")
-            empty.className = "task-empty-state"
-            empty.setAttribute("aria-live", "polite")
-            empty.textContent = "No tasks yet — add one above to get started."
-            taskList.appendChild(empty)
-            return
+            const empty = document.createElement("li");
+            empty.className = "task-empty-state";
+            empty.setAttribute("aria-live", "polite");
+            empty.textContent = "No tasks yet — add one above to get started.";
+            taskList.appendChild(empty);
+            return;
         }
 
         tasks.forEach((task, index) => {
@@ -79,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = taskInput.value.trim();
         if (text) {
             tasks.push({ text: text, completed: false });
+            saveTasks();
             renderTasks();
             taskInput.value = "";
         }
@@ -86,16 +99,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function deleteTask(index) {
         tasks.splice(index, 1);
+        saveTasks();
         renderTasks();
     }
 
     function clearAllTasks() {
         tasks = [];
+        saveTasks();
         renderTasks();
     }
 
     function toggleTaskCompletion(index) {
         tasks[index].completed = !tasks[index].completed;
+        saveTasks();
         renderTasks();
     }
 
@@ -119,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const commit = () => {
             const newText = input.value.trim();
             tasks[index].text = newText || originalText; // revert if empty
+            saveTasks();
             renderTasks();
         };
 
@@ -227,14 +244,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Adding Task With Enter
-        taskInput.addEventListener('keypress',(e)=>{
-            if (e.key=="Enter"){
-                addTask();   
-            }
-        })
+    taskInput.addEventListener("keypress", (e) => {
+        if (e.key == "Enter") {
+            addTask();
+        }
+    });
 
     // --- Block H: Application Entry Point ---
     function init() {
+        loadTasks();
         renderTasks();
         if (yearSpan) {
             yearSpan.textContent = new Date().getFullYear();
