@@ -1,53 +1,3 @@
-
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Block A: Element Hooks ---
-    const taskInput = document.getElementById('task-input');
-    const addTaskBtn = document.getElementById('add-task-btn');
-    const taskList = document.getElementById('task-list');
-    const clearAllBtn = document.getElementById('clear-all-btn');
-    const cityInput = document.getElementById('city-input');
-    const searchWeatherBtn = document.getElementById('search-weather-btn');
-    const weatherInfo = document.getElementById('weather-info');
-    const themeToggle = document.getElementById('theme-toggle');
-    const copyrightYear = document.querySelector('footer p');
-    const yearSpan = document.getElementById('year');
-
-    // --- Block B: Data Store ---
-    let tasks = [];
-
-    // --- Block C: Service Configuration ---
-   
-    const weatherApiKey = 'YOUR_API_KEY_HERE';
-
-    // --- Block D: Module 1 Functions ---
-    function renderTasks() {
-        taskList.innerHTML = '';
-        tasks.forEach((task, index) => {
-            const li = document.createElement('li');
-            li.className = 'task-item';
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = task.completed;
-            checkbox.addEventListener('change', () => toggleTaskCompletion(index));
-            
-            const taskText = document.createElement('span');
-            taskText.textContent = task.text;
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.textContent = '🗑️';
-            deleteBtn.addEventListener('click', () => {
-                tasks.splice(index, 1);
-                renderTasks();
-            });
-
-            li.appendChild(checkbox);
-            li.appendChild(taskText);
-            li.appendChild(deleteBtn);
-            taskList.appendChild(li);
-        });
-
 document.addEventListener("DOMContentLoaded", () => {
   // --- Block A: Element Hooks ---
   const taskInput = document.getElementById("task-input")
@@ -58,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const weatherInfo = document.getElementById("weather-info")
   const themeToggle = document.getElementById("theme-toggle")
   const copyrightYear = document.querySelector("footer p")
+  const yearSpan = document.getElementById("year")
 
   // --- Block B: Data Store ---
   let tasks = []
@@ -69,6 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Block D: Module 1 Functions ---
   function renderTasks() {
     taskList.innerHTML = ""
+    if (tasks.length === 0) {
+      const empty = document.createElement("li")
+      empty.className = "task-empty-state"
+      empty.setAttribute("aria-live", "polite")
+      empty.textContent = "No tasks yet — add one above to get started."
+      taskList.appendChild(empty)
+      return
+    }
     tasks.forEach((task, index) => {
       const li = document.createElement("li")
       li.className = "task-item"
@@ -106,8 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
       taskInput.value = ""
     }
   }
-
-
 
   function enableInlineEdit(index, spanEl) {
     const originalText = tasks[index].text
@@ -171,46 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `
   }
 
-    function toggleTaskCompletion(index) {
-        tasks[index].completed = !tasks[index].completed;
-        renderTasks();
-    }
-
-
-    // --- Block F: Event Registry ---
-    addTaskBtn.addEventListener('click', addTask);
-    clearAllBtn.addEventListener('click', clearAllTasks);
-
-    searchWeatherBtn.addEventListener('click', () => {
-        const city = cityInput.value.trim();
-        if (city) {
-            fetchWeather(city);
-        }
-    });
-
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-theme')
-    });
-
-    let navLinks = Array.from(document.querySelectorAll(".nav-link"))
-    navLinks.forEach((navLink)=>{
-        navLink.addEventListener('click',(e)=>{
-            navLinks.forEach((allNavLinks)=>{
-                allNavLinks.classList.remove('active')
-            })
-            e.target.classList.add('active')
-        })
-        
-    })
-    
-    // --- Block G: Application Entry Point ---
-    function init() {
-        fetchWeather("sdfasdfnsa,mn,mn.");
-        renderTasks();
-        if (yearSpan) {
-            yearSpan.textContent = new Date().getFullYear();
-        }
-
   // --- Block F: Event Registry ---
   addTaskBtn.addEventListener("click", addTask)
 
@@ -238,8 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Block G: Application Entry Point ---
   function init() {
-    fetchWeather("sdfasdfnsa,mn,mn.")
+    fetchWeather("London")
     renderTasks()
+    if (yearSpan) {
+      yearSpan.textContent = new Date().getFullYear()
+    }
   }
 
   init()
