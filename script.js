@@ -56,6 +56,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
+    incompleteTasks = [];
+    completedTasks = [];
+        tasks.forEach((task,index)=>{
+            if (task.completed){
+                completedTasks.push(task)
+            }
+            else{
+                incompleteTasks.push(task)
+            }
+        })
+        tasks = [];
+        tasks = [...incompleteTasks,...completedTasks]
     taskList.innerHTML = "";
 
     const filteredTasks = tasks.filter((task) => {
@@ -132,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     saveTasks();
+    renderTasks()
   }
 
   function enableInlineEdit(index, spanEl) {
