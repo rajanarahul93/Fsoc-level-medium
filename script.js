@@ -4,30 +4,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const addTaskBtn = document.getElementById("add-task-btn");
     const taskList = document.getElementById("task-list");
     const clearAllBtn = document.getElementById("clear-all-btn");
-    const cityInput = document.getElementById("city-input");
-    const searchWeatherBtn = document.getElementById("search-weather-btn");
+    const getLocationBtn = document.getElementById("get-location-btn");
     const weatherInfo = document.getElementById("weather-info");
     const themeToggle = document.getElementById("theme-toggle");
     const yearSpan = document.getElementById("year");
 
     // --- Block B: Data Store ---
     let tasks = [];
-    let weatherSearchTimeout = null;
 
     // --- Block C: Service Configuration ---
-    const weatherApiKey = "YOUR_API_KEY_HERE";
-    const DEBOUNCE_DELAY = 500; // 500ms delay
+    const weatherApiKey = "YOUR_API_KEY_HERE"; // Replace with your actual API key
 
     // --- Block D: Utility Functions ---
-    function debounce(func, delay) {
-        return function (...args) {
-            clearTimeout(weatherSearchTimeout);
-            weatherSearchTimeout = setTimeout(
-                () => func.apply(this, args),
-                delay,
-            );
-        };
-    }
+    // Removed debounce function - not needed without city search
 
     // --- Block E: Module 1 Functions (Task Management) ---
     function renderTasks() {
@@ -124,18 +113,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Block F: Module 2 Functions (Weather) ---
-    async function fetchWeather(city) {
-        if (!city || city.trim() === "") {
-            weatherInfo.innerHTML =
-                '<p class="loading-text">Enter a city name to see the weather...</p>';
-            return;
+    
+    // Function to get user's location and fetch weather
+    function getUserLocationWeather() {
+        if (navigator.geolocation) {
+            weatherInfo.innerHTML = '<p class="loading-text">Getting your location...</p>';
+            
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetchWeatherByCoords(lat, lon);
+                },
+                // Error callback
+                (error) => {
+                    handleLocationError(error);
+                }
+            );
+        } else {
+            weatherInfo.innerHTML = '<p class="error-text">Geolocation is not supported by your browser.</p>';
         }
+    }
 
-        // Show loading state
-        weatherInfo.innerHTML =
-            '<p class="loading-text">Loading weather data...</p>';
-
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
+    // Fetch weather by coordinates
+    async function fetchWeatherByCoords(lat, lon) {
+        weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
+        
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
 
         try {
             const response = await fetch(url);
@@ -146,30 +151,49 @@ document.addEventListener("DOMContentLoaded", () => {
             displayWeather(data);
         } catch (error) {
             console.error("Weather service call failed:", error);
-            weatherInfo.innerHTML =
-                '<p class="error-text">Weather data unavailable. Please check the city name and try again.</p>';
+            weatherInfo.innerHTML = '<p class="error-text">Failed to load weather data. Please try again.</p>';
         }
     }
 
+    // Display weather information
     function displayWeather(data) {
-        const { name, main, weather } = data;
+        const { name, main, weather, sys } = data;
         const iconUrl = `http://openweathermap.org/img/wn/${weather[0].icon}@2x.png`;
         weatherInfo.innerHTML = `
-            <h3>${name}</h3>
+            <h3>${name}${sys.country ? ', ' + sys.country : ''}</h3>
             <img src="${iconUrl}" alt="${weather[0].description}" class="weather-icon">
             <p>Temperature: ${Math.round(main.temp)}°C</p>
+            <p>Feels like: ${Math.round(main.feels_like)}°C</p>
             <p>Condition: ${weather[0].main}</p>
             <p>Description: ${weather[0].description}</p>
+            <p>Humidity: ${main.humidity}%</p>
         `;
     }
 
-    // Create debounced version of fetchWeather
-    const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
-
-    function handleWeatherSearch() {
-        const city = cityInput.value.trim();
-        debouncedFetchWeather(city);
+    // Handle location errors
+    function handleLocationError(error) {
+        let errorMessage = '';
+        
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = 'Location access denied. Please allow location access and try again.';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Location information unavailable. Please try again.';
+                break;
+            case error.TIMEOUT:
+                errorMessage = 'Location request timed out. Please try again.';
+                break;
+            default:
+                errorMessage = 'An error occurred. Please try again.';
+        }
+        
+        weatherInfo.innerHTML = `<p class="error-text">${errorMessage}</p>`;
     }
+
+    // Removed fetchWeather() function - not needed without city search
+    // Removed debouncedFetchWeather - not needed without city search
+    // Removed handleWeatherSearch() - not needed without city search
 
     // --- Block G: Event Registry ---
     // Task management events
@@ -182,22 +206,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Weather search events with debouncing
-    cityInput.addEventListener("input", handleWeatherSearch);
-    searchWeatherBtn.addEventListener("click", () => {
-        // Clear any pending debounced calls and search immediately
-        clearTimeout(weatherSearchTimeout);
-        const city = cityInput.value.trim();
-        fetchWeather(city);
-    });
-
-    // Allow Enter key to trigger immediate search
-    cityInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            clearTimeout(weatherSearchTimeout);
-            const city = cityInput.value.trim();
-            fetchWeather(city);
-        }
+    // NEW: Get location button click event
+    getLocationBtn.addEventListener("click", () => {
+        getUserLocationWeather();
     });
 
     // Theme toggle
@@ -217,11 +228,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Adding Task With Enter
-        taskInput.addEventListener('keypress',(e)=>{
-            if (e.key=="Enter"){
-                addTask();   
-            }
-        })
+    taskInput.addEventListener('keypress',(e)=>{
+        if (e.key=="Enter"){
+            addTask();   
+        }
+    })
 
     // --- Block H: Application Entry Point ---
     function init() {
@@ -229,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (yearSpan) {
             yearSpan.textContent = new Date().getFullYear();
         }
+        // Removed auto-call to getUserLocationWeather() - now button-triggered only
     }
 
     init();

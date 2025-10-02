@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> </head>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
 <body>
     <header>
         <nav>
@@ -35,18 +36,17 @@
                 <button class="filter-btn" data-filter="completed">Completed</button>
             </div>
             <ul id="task-list">
-                </ul>
-             <button id="clear-all-btn">Clear All</button>
+            </ul>
+            <button id="clear-all-btn">Clear All</button>
         </section>
 
         <section class="card weather-widget">
             <h2>Weather Report</h2>
-            <div class="weather-search">
-                <input type="text" id="city-input" placeholder="Enter city name">
-                <button id="search-weather-btn">Search</button>
+            <div class="weather-search" style="justify-content: center;">
+                <button id="get-location-btn">Get My Location Weather</button>
             </div>
             <div id="weather-info">
-                <p class="loading-text">Search for a city to see the weather...</p>
+                <p class="loading-text">Click "Get My Location Weather" to see your local weather...</p>
             </div>
         </section>
     </main>
