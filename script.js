@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const weatherInfo = document.getElementById('weather-info');
     const themeToggle = document.getElementById('theme-toggle');
     const copyrightYear = document.querySelector('footer p');
+    const yearSpan = document.getElementById('year');
 
     // --- Block B: Data Store ---
     let tasks = [];
@@ -121,6 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         fetchWeather("sdfasdfnsa,mn,mn.");
         renderTasks();
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
     }
 
     init();
