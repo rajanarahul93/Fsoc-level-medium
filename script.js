@@ -118,17 +118,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
     const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-
     if (taskElement) {
+      const taskText = taskElement.querySelector("span");
+      taskText.classList.toggle("completed", tasks[index].completed);
+
       if (
         (currentFilter === "active" && tasks[index].completed) ||
         (currentFilter === "completed" && !tasks[index].completed)
       ) {
         taskElement.remove();
         if (taskList.children.length === 0) renderTasks();
-      } else {
-        const taskText = taskElement.querySelector("span");
-        taskText.classList.toggle("completed", tasks[index].completed);
       }
     }
     saveTasks();
