@@ -1,5 +1,6 @@
 
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Block A: Element Hooks ---
     const taskInput = document.getElementById('task-input');
@@ -173,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Block E: Module 1 Functions (Task Management) ---
     function renderTasks() {
         taskList.innerHTML = "";
+
         tasks.forEach((task, index) => {
             const li = document.createElement("li");
             li.className = "task-item";
@@ -403,6 +405,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Block E: Module 1 Functions (Task Management) ---
     function renderTasks() {
         taskList.innerHTML = "";
+
+
+        if (tasks.length === 0) {
+            const empty = document.createElement("li")
+            empty.className = "task-empty-state"
+            empty.setAttribute("aria-live", "polite")
+            empty.textContent = "No tasks yet — add one above to get started."
+            taskList.appendChild(empty)
+            return
+        }
+
         tasks.forEach((task, index) => {
             const li = document.createElement("li");
             li.className = "task-item";
