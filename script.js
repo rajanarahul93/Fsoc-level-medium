@@ -36,7 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.textContent = '🗑️';
-           
+            deleteBtn.addEventListener('click', () => {
+                tasks.splice(index, 1);
+                renderTasks();
+            });
 
             li.appendChild(checkbox);
             li.appendChild(taskText);
@@ -90,7 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-  
+    function toggleTaskCompletion(index) {
+        tasks[index].completed = !tasks[index].completed;
+        renderTasks();
+    }
 
     // --- Block F: Event Registry ---
     addTaskBtn.addEventListener('click', addTask);
