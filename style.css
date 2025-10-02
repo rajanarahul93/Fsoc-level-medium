@@ -2,7 +2,6 @@
 :root {
     --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f4f7f9 100%);
     --bg-color: #f4f7f9;
-
     --card-bg-color: rgba(255,255,255,0.85);
     --text-color: #22223b;
     --primary-color: #4f8cff;
@@ -106,12 +105,54 @@ nav {
     position: relative;
 }
 
-.active{
-    color: var(--logo-color);
-    border-bottom: 2px solid var(--logo-color);
-
+.nav-link:hover {
+    color: var(--primary-color);
+    background: rgba(79,140,255,0.08);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(79,140,255,0.08);
 }
 
+.nav-link.active {
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-hover-color) 100%);
+    border-bottom: 2px solid var(--primary-hover-color);
+    box-shadow: 0 4px 16px rgba(79,140,255,0.12);
+    padding: 8px 22px;
+    text-shadow: 0 2px 8px rgba(79,140,255,0.10);
+}
+
+.theme-btn {
+    background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-hover-color) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(79,140,255,0.10);
+    transition: background 0.3s, transform 0.1s, filter 0.1s;
+}
+.theme-btn:hover {
+    background: linear-gradient(90deg, var(--primary-hover-color) 60%, var(--primary-color) 100%);
+    filter: brightness(1.08);
+}
+.theme-btn:active {
+    transform: scale(0.96);
+    filter: brightness(0.95);
+}
+
+
+/* --- Main Container --- */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2.5rem;
+}
 
 
 /* --- Card Styles --- */
@@ -177,7 +218,6 @@ nav {
     box-shadow: 0 2px 8px rgba(79,140,255,0.08);
 }
 
-
 button,
 #add-task-btn {
     padding: 0.75rem 1.5rem;
@@ -200,10 +240,10 @@ button:hover,
     transition: background-color 0.3s, transform 0.1s, filter 0.1s;
 }
 
-
 button:hover,
 #add-task-btn:hover {
-    background-color: var(--primary-hover-color);
+    background: linear-gradient(90deg, var(--primary-hover-color) 60%, var(--primary-color) 100%);
+    filter: brightness(1.08);
 }
 
 button:active,
@@ -397,6 +437,25 @@ footer {
     }
     .nav-links {
         gap: 1rem;
+    }
+    .card {
+        padding: 2rem 1rem 1.5rem 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    nav {
+        padding: 0.7rem 0.5rem;
+        margin: 1rem auto 1.5rem auto;
+    }
+    .logo {
+        font-size: 1.3rem;
+    }
+    .card {
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+    }
+    .container {
+        padding: 0 0.2rem;
     }
     .card {
         padding: 2rem 1rem 1.5rem 1rem;
