@@ -36,6 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       taskText.addEventListener("dblclick", () => enableInlineEdit(index, taskText))
 
+      const deleteBtn = document.createElement("button")
+      deleteBtn.className = "delete-btn"
+      deleteBtn.textContent = "🗑️"
+      deleteBtn.addEventListener("click", () => deleteTask(index))
+
+      li.appendChild(checkbox)
+      li.appendChild(taskText)
+      li.appendChild(deleteBtn)
+      taskList.appendChild(li)
     })
   }
 
