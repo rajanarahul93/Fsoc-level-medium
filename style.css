@@ -106,53 +106,13 @@ nav {
     position: relative;
 }
 
-.nav-link:hover {
-    color: var(--primary-color);
-    background: rgba(79,140,255,0.08);
-    border-bottom: 2px solid var(--primary-color);
-    box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+.active{
+    color: var(--logo-color);
+    border-bottom: 2px solid var(--logo-color);
+
 }
 
-.nav-link.active {
-    color: #fff;
-    font-weight: 700;
-    background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-hover-color) 100%);
-    border-bottom: 2px solid var(--primary-hover-color);
-    box-shadow: 0 4px 16px rgba(79,140,255,0.12);
-    padding: 8px 22px;
-    text-shadow: 0 2px 8px rgba(79,140,255,0.10);
-}
 
-.theme-btn {
-    background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-hover-color) 100%);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.6rem 1.5rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(79,140,255,0.10);
-    transition: background 0.3s, transform 0.1s, filter 0.1s;
-}
-.theme-btn:hover {
-    background: linear-gradient(90deg, var(--primary-hover-color) 60%, var(--primary-color) 100%);
-    filter: brightness(1.08);
-}
-.theme-btn:active {
-    transform: scale(0.96);
-    filter: brightness(0.95);
-}
-
-/* --- Main Container --- */
-.container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2.5rem;
-}
 
 /* --- Card Styles --- */
 .card {
