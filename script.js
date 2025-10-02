@@ -54,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearAllTasks(){
-        tasks=[]
+        tasks=[];
+        renderTasks();
     }
 
 
