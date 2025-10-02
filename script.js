@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
+  const sortTasksBtn = document.getElementById("sort-tasks-btn");
   const filterBtns = document.querySelectorAll(".filter-btn");
 
   const cityInput = document.getElementById("city-input");
@@ -56,6 +57,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
+    incompleteTasks = [];
+    completedTasks = [];
+        tasks.forEach((task,index)=>{
+            if (task.completed){
+                completedTasks.push(task)
+            }
+            else{
+                incompleteTasks.push(task)
+            }
+        })
+        tasks = [];
+        tasks = [...incompleteTasks,...completedTasks]
     taskList.innerHTML = "";
 
     const filteredTasks = tasks.filter((task) => {
@@ -115,23 +128,29 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   }
 
+  function sortTasksAlphabetically() {
+    tasks.sort((a, b) => a.text.localeCompare(b.text));
+    saveTasks();
+    renderTasks();
+  }
+
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
     const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-
     if (taskElement) {
+      const taskText = taskElement.querySelector("span");
+      taskText.classList.toggle("completed", tasks[index].completed);
+
       if (
         (currentFilter === "active" && tasks[index].completed) ||
         (currentFilter === "completed" && !tasks[index].completed)
       ) {
         taskElement.remove();
         if (taskList.children.length === 0) renderTasks();
-      } else {
-        const taskText = taskElement.querySelector("span");
-        taskText.classList.toggle("completed", tasks[index].completed);
       }
     }
     saveTasks();
+    renderTasks()
   }
 
   function enableInlineEdit(index, spanEl) {
@@ -235,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   clearAllBtn.addEventListener("click", clearAllTasks);
+  sortTasksBtn.addEventListener("click", sortTasksAlphabetically);
 
   filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
