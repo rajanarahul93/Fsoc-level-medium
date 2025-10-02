@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTasks();
         }
     }
-  //---Can write the the required functions here
+
+    function clearAllTasks(){
+        tasks=[]
+    }
 
 
 
@@ -100,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     themeToggle.addEventListener('click', () => {
-        console.log('Theme toggle logic is not implemented.');
+        document.body.classList.toggle('dark-theme')
     });
 
     // --- Block G: Application Entry Point ---

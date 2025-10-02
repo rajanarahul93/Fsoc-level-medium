@@ -4,6 +4,7 @@
     --card-bg-color: #ffffff;
     --text-color: #333;
     --primary-color: #007bff;
+    --logo-color: #007bff;
     --primary-hover-color: #0056b3;
     --secondary-color: #6c757d;
     --border-color: #e0e0e0;
@@ -12,6 +13,7 @@
 }
 
 body.dark-theme {
+    --logo-color:#ffffff;
     --bg-color: #1a1a2e;
     --card-bg-color: #16213e;
     --text-color: #e0e0e0;
@@ -62,7 +64,7 @@ nav {
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--logo-color);
 }
 
 .nav-links {
