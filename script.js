@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const WEATHER_TIMEOUT_MS = 8000;
   const MAX_RETRIES = 2;
 
-  // Utility Functions
+  // --- Utility Functions ---
   function debounce(func, delay) {
     return function (...args) {
       clearTimeout(weatherSearchTimeout);
@@ -59,28 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
-    // Separate incomplete and completed tasks
-    const incompleteTasks = [];
-    const completedTasks = [];
-    tasks.forEach(task => {
+    let incompleteTasks = [];
+    let completedTasks = [];
+    tasks.forEach((task) => {
       if (task.completed) completedTasks.push(task);
       else incompleteTasks.push(task);
     });
-
-    // Reorder tasks: incomplete first
     tasks = [...incompleteTasks, ...completedTasks];
 
-    // Clear current task list
     taskList.innerHTML = "";
-
-    // Filter tasks based on current filter
-    const filteredTasks = tasks.filter(task => {
+    const filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
       return true;
     });
 
-    // If no tasks, show empty state
     if (filteredTasks.length === 0) {
       const empty = document.createElement("li");
       empty.className = "task-empty-state";
@@ -90,11 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Render filtered tasks
-    filteredTasks.forEach(task => {
-      const originalIndex = tasks.findIndex(t => t === task);
-      const taskElement = createTaskElement(task, originalIndex);
-      taskList.appendChild(taskElement);
+    filteredTasks.forEach((task) => {
+      const originalIndex = tasks.findIndex((t) => t === task);
+      taskList.appendChild(createTaskElement(task, originalIndex));
     });
   }
 
@@ -105,12 +96,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const newTask = { text, completed: false };
     tasks.push(newTask);
 
+    if (currentFilter === "all" || currentFilter === "active") {
+      const emptyState = taskList.querySelector(".task-empty-state");
+      if (emptyState) emptyState.remove();
+      taskList.appendChild(createTaskElement(newTask, tasks.length - 1));
+    }
+
     saveTasks();
     taskInput.value = "";
-    renderTasks();
   }
 
   function deleteTask(index) {
+    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
+    if (taskElement) taskElement.remove();
+
     tasks.splice(index, 1);
     saveTasks();
     renderTasks();
@@ -124,6 +123,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
+
+    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
+    if (taskElement) {
+      const taskText = taskElement.querySelector("span");
+      taskText.classList.toggle("completed", tasks[index].completed);
+
+      if (
+        (currentFilter === "active" && tasks[index].completed) ||
+        (currentFilter === "completed" && !tasks[index].completed)
+      ) {
+        taskElement.remove();
+        if (taskList.children.length === 0) renderTasks();
+      }
+    }
     saveTasks();
     renderTasks();
   }
@@ -149,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     input.addEventListener("blur", saveChanges);
-    input.addEventListener("keydown", e => {
+    input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") input.blur();
       else if (e.key === "Escape") {
         input.value = originalText;
@@ -161,13 +174,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Weather Functions ---
   async function fetchWeather(city, attempt = 0) {
     if (!city) {
-      weatherInfo.innerHTML = '<p class="loading-text">Enter a city to see the weather...</p>';
+      weatherInfo.innerHTML =
+        '<p class="loading-text">Enter a city to see the weather...</p>';
       return;
     }
 
-    weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
+    weatherInfo.innerHTML =
+      '<p class="loading-text">Loading weather data...</p>';
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+      city
+    )}&appid=${weatherApiKey}&units=metric`;
+
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
 
@@ -191,18 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
       displayWeather(data);
     } catch (error) {
       clearTimeout(id);
-
       if (error.name === "AbortError") {
         showWeatherError("Request timed out.", attempt);
-        return;
+      } else {
+        showWeatherError("Weather data currently unavailable.", attempt);
       }
-
-      if (error instanceof TypeError) {
-        showWeatherError("Network error. Check your connection.", attempt);
-        return;
-      }
-
-      showWeatherError("Weather data is currently unavailable.", attempt);
     }
   }
 
@@ -210,15 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const canRetry = attempt < MAX_RETRIES;
     weatherInfo.innerHTML = `
       <p class="error-text">${message}</p>
-      ${canRetry ? '<button id="weather-retry-btn" class="retry-btn">Retry</button>' : ''}
+      ${canRetry ? '<button id="weather-retry-btn" class="retry-btn">Retry</button>' : ""}
     `;
-
     const retryBtn = document.getElementById("weather-retry-btn");
-    if (retryBtn) {
-      retryBtn.addEventListener("click", () => {
-        fetchWeather(cityInput.value.trim(), attempt + 1);
-      });
-    }
+    if (retryBtn) retryBtn.addEventListener("click", () => {
+      fetchWeather(cityInput.value.trim(), attempt + 1);
+    });
   }
 
   function displayWeather(data) {
@@ -235,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
 
   // --- Event Listeners ---
-  taskList.addEventListener("click", e => {
+  taskList.addEventListener("click", (e) => {
     const action = e.target.dataset.action;
     if (!action) return;
     const li = e.target.closest(".task-item");
@@ -244,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (action === "delete") deleteTask(index);
   });
 
-  taskList.addEventListener("change", e => {
+  taskList.addEventListener("change", (e) => {
     if (e.target.dataset.action === "toggle" && e.target.type === "checkbox") {
       const li = e.target.closest(".task-item");
       if (!li) return;
@@ -252,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  taskList.addEventListener("dblclick", e => {
+  taskList.addEventListener("dblclick", (e) => {
     if (e.target.dataset.action === "edit" && e.target.tagName === "SPAN") {
       const li = e.target.closest(".task-item");
       if (!li) return;
@@ -261,41 +269,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   addTaskBtn.addEventListener("click", addTask);
-  taskInput.addEventListener("keydown", e => { if (e.key === "Enter") addTask(); });
+  taskInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addTask();
+  });
+
   clearAllBtn.addEventListener("click", clearAllTasks);
 
-  filterBtns.forEach(btn => {
+  filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      filterBtns.forEach(b => b.classList.remove("active"));
+      filterBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       currentFilter = btn.dataset.filter;
       renderTasks();
     });
   });
 
-  cityInput.addEventListener("input", () => debouncedFetchWeather(cityInput.value.trim()));
+  cityInput.addEventListener("input", () =>
+    debouncedFetchWeather(cityInput.value.trim())
+  );
   searchWeatherBtn.addEventListener("click", () => {
     clearTimeout(weatherSearchTimeout);
     fetchWeather(cityInput.value.trim());
   });
-  cityInput.addEventListener("keydown", e => {
+  cityInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       clearTimeout(weatherSearchTimeout);
       fetchWeather(cityInput.value.trim());
     }
   });
 
-  themeToggle.addEventListener("click", () => document.body.classList.toggle("dark-theme"));
+  themeToggle.addEventListener("click", () =>
+    document.body.classList.toggle("dark-theme")
+  );
 
   const navLinks = document.querySelectorAll(".nav-link");
-  navLinks.forEach(link => {
-    link.addEventListener("click", e => {
-      navLinks.forEach(l => l.classList.remove("active"));
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      navLinks.forEach((l) => l.classList.remove("active"));
       e.currentTarget.classList.add("active");
     });
   });
 
-  // --- Initialize ---
   function init() {
     renderTasks();
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
