@@ -300,10 +300,16 @@ button:active,
 }
 
 #task-list {
+
     list-style: none;
     max-height: 300px;
     overflow-y: auto;
     margin-bottom: 1rem;
+}
+
+#task-list li{
+    margin: 10px 0;
+
 }
 
 .task-item {
