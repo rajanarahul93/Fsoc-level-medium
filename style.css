@@ -82,9 +82,15 @@ nav {
     transition: color 0.3s, border-bottom 0.3s;
 }
 
+.active{
+    color: var(--logo-color);
+    border-bottom: 2px solid var(--logo-color);
+
+}
+
 .nav-link:hover {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
+    color: var(--logo-color);
+    border-bottom: 2px solid var(--logo-color);
 }
 
 /* --- Card Styles --- */

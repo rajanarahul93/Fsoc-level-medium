@@ -106,6 +106,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-theme')
     });
 
+    let navLinks = Array.from(document.querySelectorAll(".nav-link"))
+    navLinks.forEach((navLink)=>{
+        navLink.addEventListener('click',(e)=>{
+            navLinks.forEach((allNavLinks)=>{
+                allNavLinks.classList.remove('active')
+            })
+            e.target.classList.add('active')
+        })
+        
+    })
+    
     // --- Block G: Application Entry Point ---
     function init() {
         fetchWeather("sdfasdfnsa,mn,mn.");
