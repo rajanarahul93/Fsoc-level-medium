@@ -6,6 +6,11 @@
     --text-color: #22223b;
     --primary-color: #4f8cff;
     --primary-hover-color: #2563eb;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --primary-color: #007bff;
+    --logo-color: #007bff;
+    --primary-hover-color: #0056b3;
     --secondary-color: #6c757d;
     --border-color: #e0e0e0;
     --shadow-color: rgba(80, 112, 255, 0.08);
@@ -17,6 +22,7 @@
 
 body.dark-theme {
     --bg-gradient: linear-gradient(135deg, #23243a 0%, #1a1a2e 100%);
+    --logo-color:#ffffff;
     --bg-color: #1a1a2e;
     --card-bg-color: rgba(22,33,62,0.92);
     --text-color: #e0e0e0;
@@ -72,6 +78,9 @@ nav {
     color: var(--primary-color);
     text-shadow: 0 2px 8px rgba(79,140,255,0.10);
     user-select: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--logo-color);
 }
 
 .nav-links {
@@ -218,6 +227,16 @@ button,
     cursor: pointer;
     transition: background 0.3s, transform 0.1s, filter 0.1s;
     box-shadow: 0 2px 8px rgba(79,140,255,0.10);
+}
+
+button:hover,
+#add-task-btn:hover {
+    background: linear-gradient(90deg, var(--primary-hover-color) 60%, var(--primary-color) 100%);
+    filter: brightness(1.08);
+}
+
+    transition: background-color 0.3s, transform 0.1s, filter 0.1s;
+
 }
 
 button:hover,
@@ -417,6 +436,25 @@ footer {
     }
     .nav-links {
         gap: 1rem;
+    }
+    .card {
+        padding: 2rem 1rem 1.5rem 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    nav {
+        padding: 0.7rem 0.5rem;
+        margin: 1rem auto 1.5rem auto;
+    }
+    .logo {
+        font-size: 1.3rem;
+    }
+    .card {
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+    }
+    .container {
+        padding: 0 0.2rem;
     }
     .card {
         padding: 2rem 1rem 1.5rem 1rem;
