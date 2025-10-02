@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text) {
             tasks.push({ text: text, completed: false });
             renderTasks();
+            taskInput.value='';
         }
     }
 
