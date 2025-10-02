@@ -2,10 +2,16 @@
 :root {
     --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f4f7f9 100%);
     --bg-color: #f4f7f9;
+
     --card-bg-color: rgba(255,255,255,0.85);
     --text-color: #22223b;
     --primary-color: #4f8cff;
     --primary-hover-color: #2563eb;
+    --card-bg-color: #ffffff;
+    --text-color: #333;
+    --primary-color: #007bff;
+    --logo-color: #007bff;
+    --primary-hover-color: #0056b3;
     --secondary-color: #6c757d;
     --border-color: #e0e0e0;
     --shadow-color: rgba(80, 112, 255, 0.08);
@@ -17,6 +23,7 @@
 
 body.dark-theme {
     --bg-gradient: linear-gradient(135deg, #23243a 0%, #1a1a2e 100%);
+    --logo-color:#ffffff;
     --bg-color: #1a1a2e;
     --card-bg-color: rgba(22,33,62,0.92);
     --text-color: #e0e0e0;
@@ -72,6 +79,9 @@ nav {
     color: var(--primary-color);
     text-shadow: 0 2px 8px rgba(79,140,255,0.10);
     user-select: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--logo-color);
 }
 
 .nav-links {
@@ -207,6 +217,7 @@ nav {
     box-shadow: 0 2px 8px rgba(79,140,255,0.08);
 }
 
+
 button,
 #add-task-btn {
     padding: 0.75rem 1.5rem;
@@ -224,6 +235,15 @@ button:hover,
 #add-task-btn:hover {
     background: linear-gradient(90deg, var(--primary-hover-color) 60%, var(--primary-color) 100%);
     filter: brightness(1.08);
+}
+
+    transition: background-color 0.3s, transform 0.1s, filter 0.1s;
+}
+
+
+button:hover,
+#add-task-btn:hover {
+    background-color: var(--primary-hover-color);
 }
 
 button:active,
