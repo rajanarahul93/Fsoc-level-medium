@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let tasks = [];
 
     // --- Block C: Service Configuration ---
-   
     const weatherApiKey = 'YOUR_API_KEY_HERE';
 
     // --- Block D: Module 1 Functions ---
@@ -31,11 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const taskText = document.createElement('span');
             taskText.textContent = task.text;
+            if (task.completed) {
+                taskText.classList.add('completed');
+            }
             
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.textContent = '🗑️';
-           
+            // Remove this task when delete button is clicked
+            deleteBtn.addEventListener('click', () => {
+                tasks.splice(index, 1);
+                renderTasks();
+            });
 
             li.appendChild(checkbox);
             li.appendChild(taskText);
@@ -49,18 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text) {
             tasks.push({ text: text, completed: false });
             renderTasks();
+            taskInput.value = '';
         }
     }
 
     function clearAllTasks(){
-        tasks=[]
+        tasks = [];
+        renderTasks();
     }
 
-
-
- 
-
-  
+    function toggleTaskCompletion(index) {
+        tasks[index].completed = !tasks[index].completed;
+        renderTasks();
+    }
 
     // --- Block E: Module 2 Functions sample data ---
     async function fetchWeather(city) {
@@ -73,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             displayWeather(data);
         } catch (error) {
-            console.error('Service call failed:', error);
+            console.error('Hello! Abhishek Dabbas Sir:', error);
             weatherInfo.innerHTML = `<p class="error-text">Data unavailable.</p>`;
         }
     }
@@ -88,8 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Condition: ${weather[0].main}</p>
         `;
     }
-
-  
 
     // --- Block F: Event Registry ---
     addTaskBtn.addEventListener('click', addTask);
@@ -121,6 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         fetchWeather("sdfasdfnsa,mn,mn.");
         renderTasks();
+        // Quiet welcome message in the developer console
+        console.log("Welcome to Fsoc-Medium! Enjoy your dashboard.");
+        // Update footer year automatically
+        if (copyrightYear) {
+            const year = new Date().getFullYear();
+            copyrightYear.innerHTML = `&copy; ${year} DevDash Project. All rights reserved.`;
+        }
     }
 
     init();
