@@ -123,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
-
     const taskElement = taskList.querySelector(`li[data-index='${index}']`);
     if (taskElement) {
       const taskText = taskElement.querySelector("span");
