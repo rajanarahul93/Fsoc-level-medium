@@ -300,6 +300,7 @@ button:active,
 }
 
 #task-list {
+
     list-style: none;
     max-height: 300px;
     overflow-y: auto;
@@ -312,6 +313,11 @@ button:active,
   color: var(--secondary-color);
   font-style: italic;
   border-bottom: 1px solid var(--border-color);
+}
+
+#task-list li{
+    margin: 10px 0;
+
 }
 
 .task-item {
