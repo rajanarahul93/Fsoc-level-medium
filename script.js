@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const WEATHER_TIMEOUT_MS = 8000;
   const MAX_RETRIES = 2;
 
-  // --- Utility Functions ---
+  // Utility Functions
   function debounce(func, delay) {
     return function (...args) {
       clearTimeout(weatherSearchTimeout);
