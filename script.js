@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const WEATHER_TIMEOUT_MS = 8000;
   const MAX_RETRIES = 2;
 
+  // --- Utility Functions ---
   function debounce(func, delay) {
     return function (...args) {
       clearTimeout(weatherSearchTimeout);
@@ -58,17 +59,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
-    const incompleteTasks = tasks.filter(t => !t.completed);
-    const completedTasks = tasks.filter(t => t.completed);
+    // Separate incomplete and completed tasks
+    const incompleteTasks = [];
+    const completedTasks = [];
+    tasks.forEach(task => {
+      if (task.completed) completedTasks.push(task);
+      else incompleteTasks.push(task);
+    });
+
+    // Reorder tasks: incomplete first
     tasks = [...incompleteTasks, ...completedTasks];
 
+    // Clear current task list
     taskList.innerHTML = "";
+
+    // Filter tasks based on current filter
     const filteredTasks = tasks.filter(task => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
       return true;
     });
 
+    // If no tasks, show empty state
     if (filteredTasks.length === 0) {
       const empty = document.createElement("li");
       empty.className = "task-empty-state";
@@ -78,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Render filtered tasks
     filteredTasks.forEach(task => {
       const originalIndex = tasks.findIndex(t => t === task);
       const taskElement = createTaskElement(task, originalIndex);
@@ -92,25 +105,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const newTask = { text, completed: false };
     tasks.push(newTask);
 
-    if (currentFilter === "all" || currentFilter === "active") {
-      const emptyState = taskList.querySelector(".task-empty-state");
-      if (emptyState) emptyState.remove();
-
-      const newIndex = tasks.length - 1;
-      const taskElement = createTaskElement(newTask, newIndex);
-      taskList.appendChild(taskElement);
-    }
-
     saveTasks();
     taskInput.value = "";
+    renderTasks();
   }
 
   function deleteTask(index) {
-    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-    if (taskElement) taskElement.remove();
     tasks.splice(index, 1);
-    renderTasks();
     saveTasks();
+    renderTasks();
   }
 
   function clearAllTasks() {
@@ -121,18 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
-    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-    if (taskElement) {
-      const taskText = taskElement.querySelector("span");
-      taskText.classList.toggle("completed", tasks[index].completed);
-
-      if ((currentFilter === "active" && tasks[index].completed) ||
-          (currentFilter === "completed" && !tasks[index].completed)) {
-        taskElement.remove();
-        if (taskList.children.length === 0) renderTasks();
-      }
-    }
     saveTasks();
+    renderTasks();
   }
 
   function enableInlineEdit(index, spanEl) {
@@ -165,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Weather Functions ---
   async function fetchWeather(city, attempt = 0) {
     if (!city) {
       weatherInfo.innerHTML = '<p class="loading-text">Enter a city to see the weather...</p>';
@@ -174,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
     weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
-
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
 
@@ -241,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
 
+  // --- Event Listeners ---
   taskList.addEventListener("click", e => {
     const action = e.target.dataset.action;
     if (!action) return;
@@ -301,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // --- Initialize ---
   function init() {
     renderTasks();
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
