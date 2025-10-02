@@ -77,8 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addTask() {
         const text = taskInput.value.trim();
+        // Removing the White Spaces around the text (excluding the middle one)
         if (text) {
             tasks.push({ text: text, completed: false });
+            // Checking if text is not Clear String.
             renderTasks();
             taskInput.value = "";
         }
