@@ -16,17 +16,14 @@
             margin-top: 1.5rem;
             justify-content: center;
         }
-
         .task-actions button {
             flex: 1;
             padding: 0.7rem 2.2rem;
         }
-
         .task-actions #clear-all-btn {
             margin: 0;
         }
     </style>
-
 </head>
 <body>
     <header>
@@ -40,7 +37,6 @@
             <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
         </nav>
     </header>
-
     <main class="container">
         <section class="card task-manager">
             <h2>My Tasks</h2>
@@ -60,23 +56,19 @@
                 <button id="clear-all-btn">Clear All</button>
             </div>
         </section>
-
         <section class="card weather-widget">
             <h2>Weather Report</h2>
-            <div class="weather-search">
-                <input type="text" id="city-input" placeholder="Enter city name">
-                <button id="search-weather-btn">Search</button>
+            <div class="weather-search" style="justify-content: center;">
+                <button id="get-location-btn">Get My Location Weather</button>
             </div>
             <div id="weather-info">
-                <p class="loading-text">Search for a city to see the weather...</p>
+                <p class="loading-text">Click "Get My Location Weather" to see your local weather...</p>
             </div>
         </section>
     </main>
-
     <footer>
         <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
     </footer>
-
     <script src="script.js"></script>
 </body>
 </html>

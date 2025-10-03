@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cityInput = document.getElementById("city-input");
   const searchWeatherBtn = document.getElementById("search-weather-btn");
+  const getLocationBtn = document.getElementById("get-location-btn");
   const weatherInfo = document.getElementById("weather-info");
   const themeToggle = document.getElementById("theme-toggle");
   const yearSpan = document.getElementById("year");
@@ -183,6 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Weather Functions (Original + New Geolocation) ---
+  
   async function fetchWeather(city) {
     if (!city) {
       weatherInfo.innerHTML =
@@ -206,18 +209,84 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Get user's location using Geolocation API
+  function getUserLocationWeather() {
+    if (navigator.geolocation) {
+      weatherInfo.innerHTML = '<p class="loading-text">Getting your location...</p>';
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          fetchWeatherByCoords(lat, lon);
+        },
+        (error) => {
+          handleLocationError(error);
+        }
+      );
+    } else {
+      weatherInfo.innerHTML = '<p class="error-text">Geolocation is not supported by your browser.</p>';
+    }
+  }
+
+  // Fetch weather by coordinates
+  async function fetchWeatherByCoords(lat, lon) {
+    weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
+    
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Request failed (${response.status})`);
+      }
+      const data = await response.json();
+      displayWeather(data);
+    } catch (error) {
+      console.error("Weather service call failed:", error);
+      weatherInfo.innerHTML = '<p class="error-text">Failed to load weather data. Please try again.</p>';
+    }
+  }
+
+  // Enhanced weather display
   function displayWeather(data) {
-    const { name, main, weather } = data;
+    const { name, main, weather, sys } = data;
     const iconUrl = `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`;
     weatherInfo.innerHTML = `
-            <h3>${name}</h3>
-            <img src="${iconUrl}" alt="${weather[0].description}" class="weather-icon">
-            <p>Temperature: ${Math.round(main.temp)}°C</p>
-            <p>Condition: ${weather[0].main}</p>
-        `;
+      <h3>${name}${sys.country ? ', ' + sys.country : ''}</h3>
+      <img src="${iconUrl}" alt="${weather[0].description}" class="weather-icon">
+      <p>Temperature: ${Math.round(main.temp)}°C</p>
+      <p>Feels like: ${Math.round(main.feels_like)}°C</p>
+      <p>Condition: ${weather[0].main}</p>
+      <p>Description: ${weather[0].description}</p>
+      <p>Humidity: ${main.humidity}%</p>
+    `;
+  }
+
+  // Handle location errors
+  function handleLocationError(error) {
+    let errorMessage = '';
+    
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        errorMessage = 'Location access denied. Please allow location access and try again.';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        errorMessage = 'Location information unavailable. Please try again.';
+        break;
+      case error.TIMEOUT:
+        errorMessage = 'Location request timed out. Please try again.';
+        break;
+      default:
+        errorMessage = 'An error occurred. Please try again.';
+    }
+    
+    weatherInfo.innerHTML = `<p class="error-text">${errorMessage}</p>`;
   }
 
   const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
+
+  // --- Event Listeners ---
 
   taskList.addEventListener("click", (e) => {
     const action = e.target.dataset.action;
@@ -277,6 +346,11 @@ document.addEventListener("DOMContentLoaded", () => {
       clearTimeout(weatherSearchTimeout);
       fetchWeather(cityInput.value.trim());
     }
+  });
+
+  // Location button event listener
+  getLocationBtn.addEventListener("click", () => {
+    getUserLocationWeather();
   });
 
   themeToggle.addEventListener("click", () => {
