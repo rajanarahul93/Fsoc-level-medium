@@ -4,9 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
   const filterBtns = document.querySelectorAll(".filter-btn");
-
   const cityInput = document.getElementById("city-input");
-  const taskListSkeleton = document.getElementById("task-list-skeleton");
+  const skeletonItems = document.querySelectorAll(".skeleton-item");
   const searchWeatherBtn = document.getElementById("search-weather-btn");
   const weatherInfo = document.getElementById("weather-info");
   const themeToggle = document.getElementById("theme-toggle");
@@ -57,23 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
-   taskList.style.display = "none";
-   taskListSkeleton.style.display = "block";
+  skeletonItems.forEach((item) => (item.style.display = "none"));
 
-   setTimeout(() => {
-       let incompleteTasks = [];
-       let completedTasks = [];
-        tasks.forEach((task,index)=>{
-            if (task.completed){
-                completedTasks.push(task)
-            }
-            else{
-                incompleteTasks.push(task)
-            }
-        })
-        tasks = [];
-        tasks = [...incompleteTasks,...completedTasks]
-    taskList.innerHTML = "";
+  const actualTaskItems = taskList.querySelectorAll("li:not(.skeleton-item)");
+  actualTaskItems.forEach(item => item.remove());
 
     const filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
@@ -84,21 +70,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (filteredTasks.length === 0) {
       const empty = document.createElement("li");
       empty.className = "task-empty-state";
-      empty.setAttribute("aria-live", "polite");
       empty.textContent = "No tasks here. Add a new one or change your filter!";
       taskList.appendChild(empty);
-       } else {
-    filteredTasks.forEach((task) => {
-      const originalIndex = tasks.findIndex((t) => t === task);
-      const taskElement = createTaskElement(task, originalIndex);
-      taskList.appendChild(taskElement);
-    });
-       }
-       
-       // Hide skeleton and show the actual list
-       taskListSkeleton.style.display = "none";
-       taskList.style.display = "block";
-   }, 1000);
+    } else {
+      filteredTasks.forEach((task) => {
+        const originalIndex = tasks.findIndex((t) => t === task);
+        const taskElement = createTaskElement(task, originalIndex);
+        taskList.appendChild(taskElement);
+      });
+    }
   }
 
   function addTask() {
@@ -293,7 +273,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function init() {
-    renderTasks();
+    skeletonItems.forEach(item => item.style.display = 'flex');
+    // Simulate initial data fetch
+    setTimeout(() => {
+        renderTasks();
+    }, 1000); // 1-second delay for demo
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
     fetchWeather("London");
   }
