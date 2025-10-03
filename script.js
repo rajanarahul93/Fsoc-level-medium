@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Weather API Key ---
-  const weatherApiKey = "YOUR_API_KEY"; // Guys dont put your API key here
+  const weatherApiKey = "4b1ee5452a2e3f68205153f28bf93927";
   const DEBOUNCE_DELAY = 500;
   const WEATHER_TIMEOUT_MS = 8000;
   const MAX_RETRIES = 3;
