@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
+  const sortTasksBtn = document.getElementById("sort-tasks-btn");
   const filterBtns = document.querySelectorAll(".filter-btn");
 
   const cityInput = document.getElementById("city-input");
@@ -127,6 +128,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   }
 
+  function sortTasksAlphabetically() {
+    tasks.sort((a, b) => a.text.localeCompare(b.text));
+    saveTasks();
+    renderTasks();
+  }
+
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
     const taskElement = taskList.querySelector(`li[data-index='${index}']`);
@@ -247,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   clearAllBtn.addEventListener("click", clearAllTasks);
+  sortTasksBtn.addEventListener("click", sortTasksAlphabetically);
 
   filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
