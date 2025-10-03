@@ -8,20 +8,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> </head>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        .task-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+        .task-actions button {
+            flex: 1;
+            padding: 0.7rem 2.2rem;
+        }
+        .task-actions #clear-all-btn {
+            margin: 0;
+        }
+    </style>
+</head>
 <body>
     <header>
         <nav>
             <div class="logo">Fsoc-Medium</div>
             <ul class="nav-links">
                 <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
         </nav>
     </header>
-
     <main class="container">
         <section class="card task-manager">
             <h2>My Tasks</h2>
@@ -35,26 +50,28 @@
                 <button class="filter-btn" data-filter="completed">Completed</button>
             </div>
             <ul id="task-list">
-                </ul>
-             <button id="clear-all-btn">Clear All</button>
+            </ul>
+            <div class="task-actions">
+                <button id="sort-tasks-btn">Sort A-Z</button>
+                <button id="clear-all-btn">Clear All</button>
+            </div>
         </section>
-
         <section class="card weather-widget">
             <h2>Weather Report</h2>
-            <div class="weather-search">
-                <input type="text" id="city-input" placeholder="Enter city name">
-                <button id="search-weather-btn">Search</button>
+            <div class="weather-search" style="justify-content: center;">
+                <button id="get-location-btn">Get My Location Weather</button>
             </div>
             <div id="weather-info">
-                <p class="loading-text">Search for a city to see the weather...</p>
+                <p class="loading-text">Click "Get My Location Weather" to see your local weather...</p>
             </div>
         </section>
     </main>
-
     <footer>
         <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
+        <div class="footer-nav">
+             <a href="index.html">Dashboard</a> | <a href="about.html">About</a> | <a href="#contact">Contact</a>
+        </div>
     </footer>
-
     <script src="script.js"></script>
 </body>
 </html>
