@@ -407,10 +407,12 @@ button:active,
 }
 
 #weather-info .weather-icon {
-    width: 54px;
-    height: 54px;
-    margin: 0.5rem auto;
-    filter: drop-shadow(0 2px 8px rgba(79,140,255,0.10));
+    width: 110px;
+    height: 110px;
+    margin: 1.2rem auto;
+    display: block;
+    filter: drop-shadow(0 2px 12px rgba(79,140,255,0.18));
+    transition: width 0.2s, height 0.2s;
 }
 
 #weather-info p {
