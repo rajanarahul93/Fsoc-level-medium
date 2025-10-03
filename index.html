@@ -23,6 +23,40 @@
         .task-actions #clear-all-btn {
             margin: 0;
         }
+        .shortcut-modal{
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+        }
+        .shortcut-modal.active{
+            display: block;
+        }
+        .shortcut-modal h3{
+            margin: top 0; 
+        }
+        .shortcut-modal ul{
+            padding-left: 1rem;
+        }
+        .shortcut-hint{
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+        #task-list li{
+            outline: none;
+        }
+        #task-list li:focus{
+            background: #e0f7fa;
+        }
     </style>
 </head>
 <body>
@@ -38,8 +72,8 @@
         </nav>
     </header>
     <main class="container">
-        <section class="card task-manager">
-            <h2>My Tasks</h2>
+        <section class="card task-manager" id="dashboard">
+            <h2>My Tasks <span class="shortcut hint"></span></h2>
             <div class="task-input-container">
                 <input type="text" id="task-input" placeholder="Ready to crush your next goal?">
                 <button id="add-task-btn">Add Task</button>
@@ -56,6 +90,117 @@
                 <button id="clear-all-btn">Clear All</button>
             </div>
         </section>
+    </main>
+<div class="shortcut-modal" id="shortcut-modal" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
+    <h3 id="shortcut-title">Keyboard Shortcuts</h3>
+    <form id="shortcut-form">
+      <ul>
+        <li>Add Task: <input type="text" id="key-add" maxlength="1"></li>
+        <li>Search Task: <input type="text" id="key-search" maxlength="1"></li>
+        <li>Next Task: <input type="text" id="key-next" maxlength="1"></li>
+        <li>Previous Task: <input type="text" id="key-prev" maxlength="1"></li>
+        <li>Show Help: <input type="text" id="key-help" maxlength="1"></li>
+      </ul>
+      <button type="submit">Save Shortcuts</button>
+    </form>
+    <button id="close-shortcut-modal">Close</button>
+  </div>
+  <footer>
+    <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const taskInput = document.getElementById('task-input');
+    const addTaskBtn = document.getElementById('add-task-btn');
+    const taskList = document.getElementById('task-list');
+    const shortcutModal = document.getElementById('shortcut-modal');
+    const defaultShortcuts = {
+      add: 'a',
+      search: 's',
+      next: 'n',
+      prev: 'p',
+      help: '?'
+    };
+    let shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || defaultShortcuts;
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+
+      if (key === shortcuts.add) {
+        e.preventDefault();
+        taskInput.focus();
+      }
+      if (key === shortcuts.search) {
+        e.preventDefault();
+        taskInput.focus();
+      }
+      if (key === shortcuts.next) {
+        e.preventDefault();
+        navigateTasks('next');
+      }
+      if (key === shortcuts.prev) {
+        e.preventDefault();
+        navigateTasks('prev');
+      }
+      if (key === shortcuts.help.toLowerCase()) {
+        e.preventDefault();
+        shortcutModal.classList.toggle('active');
+        fillFormWithShortcuts();
+      }
+      if (key === 'escape') {
+        shortcutModal.classList.remove('active');
+      }
+      if (key === 'enter' && document.activeElement === taskInput) {
+        addTaskBtn.click();
+      }
+    });
+    addTaskBtn.addEventListener('click', () => {
+      if (taskInput.value.trim() !== "") {
+        const li = document.createElement('li');
+        li.textContent = taskInput.value.trim();
+        li.tabIndex = 0; // focusable
+        taskList.appendChild(li);
+        taskInput.value = "";
+      }
+    });
+    function navigateTasks(direction) {
+      const tasks = document.querySelectorAll('#task-list li');
+      if (!tasks.length) return;
+
+      let currentIndex = Array.from(tasks).indexOf(document.activeElement);
+      if (direction === 'next') currentIndex++;
+      if (direction === 'prev') currentIndex--;
+
+      if (currentIndex >= tasks.length) currentIndex = 0;
+      if (currentIndex <script 0) currentIndex = tasks.length - 1;
+
+      tasks[currentIndex].focus();
+    }
+    document.getElementById('close-shortcut-modal').addEventListener('click', () => {
+      shortcutModal.classList.remove('active');
+    });
+ function fillFormWithShortcuts() {
+      document.getElementById('key-add').value = shortcuts.add;
+      document.getElementById('key-search').value = shortcuts.search;
+      document.getElementById('key-next').value = shortcuts.next;
+      document.getElementById('key-prev').value = shortcuts.prev;
+      document.getElementById('key-help').value = shortcuts.help;
+    }
+    document.getElementById('shortcut-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      shortcuts = {
+        add: document.getElementById('key-add').value.toLowerCase() || shortcuts.add,
+        search: document.getElementById('key-search').value.toLowerCase() || shortcuts.search,
+        next: document.getElementById('key-next').value.toLowerCase() || shortcuts.next,
+        prev: document.getElementById('key-prev').value.toLowerCase() || shortcuts.prev,
+        help: document.getElementById('key-help').value || shortcuts.help
+      };
+      localStorage.setItem('shortcuts', JSON.stringify(shortcuts));
+      alert('Shortcuts updated!');
+      shortcutModal.classList.remove('active');
+    });
+document.getElementById('year').textContent = new Date().getFullYear();
+
+
         <section class="card weather-widget">
             <h2>Weather Report</h2>
             <div class="weather-search" style="justify-content: center;">
@@ -65,13 +210,8 @@
                 <p class="loading-text">Search for a city to see the weather...</p>
             </div>
         </section>
-    </main>
-    <footer>
-        <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
-        <div class="footer-nav">
-             <a href="index.html">Dashboard</a> | <a href="about.html">About</a> | <a href="#contact">Contact</a>
-        </div>
-    </footer>
+    </script>
     <script src="script.js"></script>
-</body>
-</html>
+    <script src="weather.js"></script>
+    </body>
+    </html>
