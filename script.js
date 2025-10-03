@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
+  const sortTasksBtn = document.getElementById("sort-tasks-btn");
   const filterBtns = document.querySelectorAll(".filter-btn");
 
   const cityInput = document.getElementById("city-input");
@@ -128,6 +129,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   }
 
+  function sortTasksAlphabetically() {
+    tasks.sort((a, b) => a.text.localeCompare(b.text));
+    saveTasks();
+    renderTasks();
+  }
+
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
     const taskElement = taskList.querySelector(`li[data-index='${index}']`);
@@ -202,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // NEW: Get user's location using Geolocation API
+  // Get user's location using Geolocation API
   function getUserLocationWeather() {
     if (navigator.geolocation) {
       weatherInfo.innerHTML = '<p class="loading-text">Getting your location...</p>';
@@ -222,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // NEW: Fetch weather by coordinates
+  // Fetch weather by coordinates
   async function fetchWeatherByCoords(lat, lon) {
     weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
     
@@ -241,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // MODIFIED: Enhanced weather display
+  // Enhanced weather display
   function displayWeather(data) {
     const { name, main, weather, sys } = data;
     const iconUrl = `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`;
@@ -256,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // NEW: Handle location errors
+  // Handle location errors
   function handleLocationError(error) {
     let errorMessage = '';
     
@@ -316,6 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   clearAllBtn.addEventListener("click", clearAllTasks);
+  sortTasksBtn.addEventListener("click", sortTasksAlphabetically);
 
   filterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -340,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // NEW: Location button event listener
+  // Location button event listener
   getLocationBtn.addEventListener("click", () => {
     getUserLocationWeather();
   });
