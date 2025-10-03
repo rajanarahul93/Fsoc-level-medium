@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterBtns = document.querySelectorAll(".filter-btn");
 
   const cityInput = document.getElementById("city-input");
+  const taskListSkeleton = document.getElementById("task-list-skeleton");
   const searchWeatherBtn = document.getElementById("search-weather-btn");
   const weatherInfo = document.getElementById("weather-info");
   const themeToggle = document.getElementById("theme-toggle");
@@ -56,8 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
-    incompleteTasks = [];
-    completedTasks = [];
+   taskList.style.display = "none";
+   taskListSkeleton.style.display = "block";
+
+   setTimeout(() => {
+       let incompleteTasks = [];
+       let completedTasks = [];
         tasks.forEach((task,index)=>{
             if (task.completed){
                 completedTasks.push(task)
@@ -82,24 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
       empty.setAttribute("aria-live", "polite");
       empty.textContent = "No tasks here. Add a new one or change your filter!";
       taskList.appendChild(empty);
-      return;
-    }
-
-    function addTask() {
-        const text = taskInput.value.trim();
-        // Removing the White Spaces around the text (excluding the middle one)
-        if (text) {
-            tasks.push({ text: text, completed: false });
-            // Checking if text is not Clear String.
-            renderTasks();
-            taskInput.value = "";
-        }
-    }
+       } else {
     filteredTasks.forEach((task) => {
       const originalIndex = tasks.findIndex((t) => t === task);
       const taskElement = createTaskElement(task, originalIndex);
       taskList.appendChild(taskElement);
     });
+       }
+       
+       // Hide skeleton and show the actual list
+       taskListSkeleton.style.display = "none";
+       taskList.style.display = "block";
+   }, 1000);
   }
 
   function addTask() {
