@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // --- Task Manager Setup ---
   const taskInput = document.getElementById("task-input");
+  const dueDateInput = document.getElementById("due-date-input"); // NEW
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
@@ -48,19 +49,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Task Data Model ---
-  // Each task: { text, completed, created, priority }
+  // Each task: { text, completed, created, priority, dueDate }
   function addTask() {
     const text = taskInput.value.trim();
+    const dueDate = dueDateInput.value ? dueDateInput.value : null;
     if (!text) return;
     const newTask = {
       text,
       completed: false,
       created: Date.now(),
-      priority: 2 // default priority: 1=High, 2=Medium, 3=Low
+      priority: 2, // default priority: 1=High, 2=Medium, 3=Low
+      dueDate
     };
     tasks.push(newTask);
     saveTasks();
     taskInput.value = "";
+    dueDateInput.value = "";
     renderTasks();
   }
 
@@ -142,6 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
             : b.completed - a.completed
         );
         break;
+      case "dueDate":
+        sorted.sort((a, b) => {
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return sortState.direction === "asc"
+            ? new Date(a.dueDate) - new Date(b.dueDate)
+            : new Date(b.dueDate) - new Date(a.dueDate);
+        });
+        break;
       default:
         break;
     }
@@ -186,7 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
     header.className = "task-header";
     header.innerHTML = `
       <span class="sortable" data-sort="title">Title ${sortState.key === "title" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
-      <span class="sortable" data-sort="date">Date ${sortState.key === "date" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
+      <span class="sortable" data-sort="date">Date Added ${sortState.key === "date" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
+      <span class="sortable" data-sort="dueDate">Due Date ${sortState.key === "dueDate" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
       <span class="sortable" data-sort="priority">Priority ${sortState.key === "priority" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
       <span class="sortable" data-sort="status">Status ${sortState.key === "status" ? (sortState.direction === "asc" ? "▲" : "▼") : ""}</span>
       <span></span>
@@ -195,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     header.style.background = "rgba(0,0,0,0.03)";
     header.style.borderBottom = "1px solid var(--border-color)";
     header.style.display = "grid";
-    header.style.gridTemplateColumns = "2fr 1fr 1fr 1fr 0.5fr";
+    header.style.gridTemplateColumns = "2fr 1fr 1fr 1fr 1fr 0.5fr";
     header.style.alignItems = "center";
     header.style.padding = "0.5rem 0.5rem";
     taskList.appendChild(header);
@@ -206,10 +221,21 @@ document.addEventListener("DOMContentLoaded", () => {
       li.className = "task-item";
       li.dataset.index = originalIndex;
       li.style.display = "grid";
-      li.style.gridTemplateColumns = "2fr 1fr 1fr 1fr 0.5fr";
+      li.style.gridTemplateColumns = "2fr 1fr 1fr 1fr 1fr 0.5fr";
       li.style.alignItems = "center";
       li.style.padding = "0.5rem 0.5rem";
       li.style.transition = "background 0.2s";
+
+      // Highlight overdue tasks
+      let isOverdue = false;
+      if (task.dueDate && !task.completed) {
+        const now = new Date();
+        const due = new Date(task.dueDate);
+        if (due < now.setHours(0,0,0,0)) {
+          li.classList.add("overdue-task");
+          isOverdue = true;
+        }
+      }
 
       // Title
       const checkbox = document.createElement("input");
@@ -227,10 +253,15 @@ document.addEventListener("DOMContentLoaded", () => {
       titleCell.appendChild(checkbox);
       titleCell.appendChild(taskText);
 
-      // Date
+      // Date Added
       const dateCell = document.createElement("span");
       const dateObj = new Date(task.created);
       dateCell.textContent = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Due Date
+      const dueDateCell = document.createElement("span");
+      dueDateCell.textContent = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "-";
+      if (isOverdue) dueDateCell.classList.add("overdue-date");
 
       // Priority
       const priorityCell = document.createElement("span");
@@ -252,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       li.appendChild(titleCell);
       li.appendChild(dateCell);
+      li.appendChild(dueDateCell);
       li.appendChild(priorityCell);
       li.appendChild(statusCell);
       li.appendChild(deleteBtn);
@@ -409,6 +441,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Task Events ---
   addTaskBtn.addEventListener("click", addTask);
   taskInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addTask();
+  });
+  dueDateInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addTask();
   });
   clearAllBtn.addEventListener("click", clearAllTasks);
