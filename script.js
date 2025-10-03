@@ -67,10 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
         tasks = [];
+
         tasks = [...incompleteTasks,...completedTasks]
     taskList.innerHTML = "";
-
-    const filteredTasks = tasks.filter((task) => {
+    document.querySelector("#filter-active").innerHTML = `Active [${incompleteTasks.length}]`
+    document.querySelector("#filter-completed").innerHTML = `Completed [${completedTasks.length}]`
+        const filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
       return true;
