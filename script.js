@@ -119,7 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     saveTasks();
-    taskInput.value = "";
+    taskInput.value = ""; 
+    renderTasks();      
   }
 
   function deleteTask(index) {
