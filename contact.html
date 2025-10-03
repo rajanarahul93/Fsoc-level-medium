@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Fsoc-Medium</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        
+        <nav>
+           <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Dashboard</a></li>
+    <li><a href="index.html#about" class="nav-link">About</a></li>
+    <li><a href="contact.html" class="nav-link active">Contact</a></li>
+    <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
+
+</ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card contact-card">
+            <h2>Contact Us</h2>
+            <form id="contact-form">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Your Email" required>
+
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" placeholder="Subject" required>
+
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Type your message here..." required></textarea>
+
+                <button type="submit">Send Message</button>
+            </form>
+<div class="contact-info">
+    <h3>Organization Info</h3>
+    <p><strong>Address:</strong> VishranthWadi, Pune, India</p>
+    <p><strong>Phone:</strong> +91 1234567890</p>
+    <p><strong>Email:</strong> contact@fsoc.com</p>
+    <p><strong>Office Hours:</strong> Mon-Fri 9:00 AM - 6:00 PM</p>
+    <p><strong>Follow Us:</strong> 
+        <a href="https://www.instagram.com/" target="_blank">Instagram</a> | 
+        <a href="https://www.linkedin.com/" target="_blank">LinkedIn</a> | 
+        <a href="https://github.com/" target="_blank">GitHub</a>
+    </p>
+</div>
+<footer class="footer">
+    <p>&copy; 2025 FSoC Project. All rights reserved.</p>
+    <nav>
+        <ul class="nav-links">
+    
+            <li class="kohli"><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+    </nav>
+</footer>
+
+
+        </section>
+    </main>
+
+
+
+    <script>
+        // Basic form validation
+        const form = document.getElementById('contact-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you! Your message has been submitted.');
+            form.reset();
+        });
+
+        // Optional: theme toggle
+        const themeBtn = document.getElementById('theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+        });
+    </script>
+</body>
+</html>

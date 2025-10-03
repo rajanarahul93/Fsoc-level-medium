@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Fsoc-Medium</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* Add some basic styling for the new about page elements */
+        .about-section {
+            margin-bottom: 2rem;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            text-align: center;
+        }
+        .team-member img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+        }
+        .team-member h3 {
+            margin-bottom: 0.25rem;
+        }
+        .timeline {
+            list-style: none;
+            padding: 0;
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            height: 100%;
+            width: 4px;
+            background: var(--border-color);
+        }
+        .timeline li {
+            margin-bottom: 2rem;
+            padding-left: 40px;
+            position: relative;
+        }
+        .timeline li::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid var(--background-color);
+        }
+        .timeline-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        footer .footer-nav {
+            margin-bottom: 1rem;
+        }
+        footer .footer-nav a {
+            color: var(--text-color);
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        footer .footer-nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Fsoc-Medium</div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Dashboard</a></li>
+                <li><a href="about.html" class="nav-link active">About</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="card about-section">
+            <h2>Our Mission</h2>
+            <p>Our mission is to empower developers by creating intuitive, efficient, and innovative tools that solve real-world problems. We believe in the power of open collaboration and strive to build a community where creativity and technology intersect to drive progress.</p>
+        </section>
+
+        <section class="card about-section">
+            <h2>Our History</h2>
+            <p>Founded in 2020, Fsoc-Medium started as a small project driven by a passion for clean code and user-centric design. From a simple task manager, it has evolved into a comprehensive dashboard aimed at boosting productivity for individuals and teams worldwide. Our journey is a testament to continuous improvement and community feedback.</p>
+        </section>
+
+        <section class="card about-section">
+            <h2>Meet the Team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="Team Member 1">
+                    <h3>Alex Rivera</h3>
+                    <p>Lead Developer</p>
+                </div>
+                <div class="team-member">
+                    <img src="https://i.pravatar.cc/150?img=5" alt="Team Member 2">
+                    <h3>Jordan Lee</h3>
+                    <p>UI/UX Designer</p>
+                </div>
+                <div class="team-member">
+                    <img src="https://i.pravatar.cc/150?img=8" alt="Team Member 3">
+                    <h3>Casey Smith</h3>
+                    <p>Project Manager</p>
+                </div>
+                 <div class="team-member">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="Team Member 4">
+                    <h3>Morgan Taylor</h3>
+                    <p>QA Engineer</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card about-section">
+            <h2>Our Milestones</h2>
+            <ul class="timeline">
+                <li>
+                    <div class="timeline-content">
+                        <h3>2020 - Project Inception</h3>
+                        <p>Fsoc-Medium was born as a command-line tool for personal task management.</p>
+                    </div>
+                </li>
+                 <li>
+                    <div class="timeline-content">
+                        <h3>2022 - First Public Release</h3>
+                        <p>Launched the first web-based version with a public API, gaining 1,000 active users in the first month.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="timeline-content">
+                        <h3>2024 - Open Source</h3>
+                        <p>The project was fully open-sourced to encourage community contributions and transparency.</p>
+                    </div>
+                </li>
+                 <li>
+                    <div class="timeline-content">
+                        <h3>2025 - 100,000 Users</h3>
+                        <p>Reached a major milestone, serving over 100,000 users worldwide with our productivity tools.</p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-nav">
+             <a href="index.html">Dashboard</a> | <a href="about.html">About</a> | <a href="index.html#contact">Contact</a>
+        </div>
+        <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
