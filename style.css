@@ -379,10 +379,13 @@ button:active,
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 #city-input {
-    flex-grow: 1;
+    flex: 1 1 180px;
+    min-width: 120px;
     padding: 0.75rem 1rem;
     border: 1.5px solid var(--border-color);
     border-radius: 8px;
@@ -390,6 +393,7 @@ button:active,
     background: rgba(255,255,255,0.7);
     transition: border 0.2s, box-shadow 0.2s;
     outline: none;
+    margin-bottom: 0.5rem;
 }
 #city-input:focus {
     border: 1.5px solid var(--primary-color);
@@ -496,7 +500,15 @@ footer {
         padding: 2rem 1rem 1.5rem 1rem;
 
     }
-
+    .weather-search {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    #city-input {
+        width: 100%;
+        min-width: 0;
+    }
 }
 
 @media (max-width: 600px) {
@@ -509,6 +521,19 @@ footer {
     }
     .card {
         padding: 1.2rem 0.5rem 1rem 0.5rem;
+    }
+    .weather-search {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    #city-input {
+        width: 100%;
+        min-width: 0;
+    }
+    #weather-info .weather-icon {
+        width: 80px;
+        height: 80px;
     }
 }
 .contact-card .contact-info {

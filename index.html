@@ -59,10 +59,12 @@
         <section class="card weather-widget">
             <h2>Weather Report</h2>
             <div class="weather-search" style="justify-content: center;">
+                <input type="text" id="city-input" placeholder="Search city...">
+                <button id="search-weather-btn">Search</button>
                 <button id="get-location-btn">Get My Location Weather</button>
             </div>
             <div id="weather-info" role="status" aria-live="polite">
-                <p class="loading-text">Search for a city to see the weather...</p>
+                <p class="loading-text">Search for a city or use your location to see the weather...</p>
             </div>
         </section>
     </main>
