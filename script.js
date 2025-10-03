@@ -17,7 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const weatherApiKey = "YOUR_API_KEY_HERE";
   const DEBOUNCE_DELAY = 500;
+  const WEATHER_TIMEOUT_MS = 8000;
+  const MAX_RETRIES = 2;
 
+  // --- Utility Functions ---
   function debounce(func, delay) {
     return function (...args) {
       clearTimeout(weatherSearchTimeout);
@@ -62,6 +65,24 @@ document.addEventListener("DOMContentLoaded", () => {
   actualTaskItems.forEach(item => item.remove());
 
     const filteredTasks = tasks.filter((task) => {
+
+    incompleteTasks = [];
+    completedTasks = [];
+        tasks.forEach((task,index)=>{
+            if (task.completed){
+                completedTasks.push(task)
+            }
+            else{
+                incompleteTasks.push(task)
+            }
+        })
+        tasks = [];
+
+        tasks = [...incompleteTasks,...completedTasks]
+    taskList.innerHTML = "";
+    document.querySelector("#filter-active").innerHTML = `Active [${incompleteTasks.length}]`
+    document.querySelector("#filter-completed").innerHTML = `Completed [${completedTasks.length}]`
+        const filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
       return true;
@@ -79,6 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
         taskList.appendChild(taskElement);
       });
     }
+    filteredTasks.forEach((task) => {
+      const originalIndex = tasks.findIndex((t) => t === task);
+      taskList.appendChild(createTaskElement(task, originalIndex));
+    });
   }
 
   function addTask() {
@@ -91,14 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentFilter === "all" || currentFilter === "active") {
       const emptyState = taskList.querySelector(".task-empty-state");
       if (emptyState) emptyState.remove();
-
-      const newIndex = tasks.length - 1;
-      const taskElement = createTaskElement(newTask, newIndex);
-      taskList.appendChild(taskElement);
+      taskList.appendChild(createTaskElement(newTask, tasks.length - 1));
     }
 
     saveTasks();
-    taskInput.value = "";
+    taskInput.value = ""; 
+    renderTasks();      
   }
 
   function deleteTask(index) {
@@ -106,8 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (taskElement) taskElement.remove();
 
     tasks.splice(index, 1);
-    renderTasks();
     saveTasks();
+    renderTasks();
   }
 
   function clearAllTasks() {
@@ -132,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     saveTasks();
-    renderTasks()
+    renderTasks();
   }
 
   function enableInlineEdit(index, spanEl) {
@@ -165,12 +188,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function fetchWeather(city) {
+  // --- Weather Functions ---
+  async function fetchWeather(city, attempt = 0) {
     if (!city) {
       weatherInfo.innerHTML =
         '<p class="loading-text">Enter a city to see the weather...</p>';
       return;
     }
+
     weatherInfo.innerHTML =
       '<p class="loading-text">Loading weather data...</p>';
 
@@ -178,29 +203,63 @@ document.addEventListener("DOMContentLoaded", () => {
       city
     )}&appid=${weatherApiKey}&units=metric`;
 
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`City not found (${response.status})`);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          showWeatherError("Invalid API key.");
+          return;
+        }
+        if (response.status === 404) {
+          showWeatherError("City not found.");
+          return;
+        }
+        throw new Error(`Server error (${response.status})`);
+      }
+
       const data = await response.json();
       displayWeather(data);
     } catch (error) {
-      weatherInfo.innerHTML = `<p class="error-text">Weather data unavailable.</p>`;
+      clearTimeout(id);
+      if (error.name === "AbortError") {
+        showWeatherError("Request timed out.", attempt);
+      } else {
+        showWeatherError("Weather data currently unavailable.", attempt);
+      }
     }
+  }
+
+  function showWeatherError(message, attempt = 0) {
+    const canRetry = attempt < MAX_RETRIES;
+    weatherInfo.innerHTML = `
+      <p class="error-text">${message}</p>
+      ${canRetry ? '<button id="weather-retry-btn" class="retry-btn">Retry</button>' : ""}
+    `;
+    const retryBtn = document.getElementById("weather-retry-btn");
+    if (retryBtn) retryBtn.addEventListener("click", () => {
+      fetchWeather(cityInput.value.trim(), attempt + 1);
+    });
   }
 
   function displayWeather(data) {
     const { name, main, weather } = data;
     const iconUrl = `https://openweathermap.org/img/wn/${weather[0].icon}@2x.png`;
     weatherInfo.innerHTML = `
-            <h3>${name}</h3>
-            <img src="${iconUrl}" alt="${weather[0].description}" class="weather-icon">
-            <p>Temperature: ${Math.round(main.temp)}°C</p>
-            <p>Condition: ${weather[0].main}</p>
-        `;
+      <h3>${name}</h3>
+      <img src="${iconUrl}" alt="${weather[0].description}" class="weather-icon">
+      <p>Temperature: ${Math.round(main.temp)}°C</p>
+      <p>Condition: ${weather[0].main}</p>
+    `;
   }
 
   const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
 
+  // --- Event Listeners ---
   taskList.addEventListener("click", (e) => {
     const action = e.target.dataset.action;
     if (!action) return;
@@ -211,22 +270,18 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   taskList.addEventListener("change", (e) => {
-    const action = e.target.dataset.action;
-    if (action === "toggle" && e.target.type === "checkbox") {
+    if (e.target.dataset.action === "toggle" && e.target.type === "checkbox") {
       const li = e.target.closest(".task-item");
       if (!li) return;
-      const index = parseInt(li.dataset.index, 10);
-      toggleTaskCompletion(index);
+      toggleTaskCompletion(parseInt(li.dataset.index, 10));
     }
   });
 
   taskList.addEventListener("dblclick", (e) => {
-    const action = e.target.dataset.action;
-    if (action === "edit" && e.target.tagName === "SPAN") {
+    if (e.target.dataset.action === "edit" && e.target.tagName === "SPAN") {
       const li = e.target.closest(".task-item");
       if (!li) return;
-      const index = parseInt(li.dataset.index, 10);
-      enableInlineEdit(index, e.target);
+      enableInlineEdit(parseInt(li.dataset.index, 10), e.target);
     }
   });
 
@@ -260,9 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark-theme");
-  });
+  themeToggle.addEventListener("click", () =>
+    document.body.classList.toggle("dark-theme")
+  );
 
   const navLinks = document.querySelectorAll(".nav-link");
   navLinks.forEach((link) => {
