@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Task Manager Setup ---
   const taskInput = document.getElementById("task-input");
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
   const clearAllBtn = document.getElementById("clear-all-btn");
   const filterBtns = document.querySelectorAll(".filter-btn");
 
+  // --- Weather Widget Setup ---
   const cityInput = document.getElementById("city-input");
   const searchWeatherBtn = document.getElementById("search-weather-btn");
+  const getLocationBtn = document.getElementById("get-location-btn");
   const weatherInfo = document.getElementById("weather-info");
   const themeToggle = document.getElementById("theme-toggle");
   const yearSpan = document.getElementById("year");
@@ -15,10 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFilter = "all";
   let weatherSearchTimeout = null;
 
-  const weatherApiKey = "YOUR_API_KEY_HERE";
+  
+  
+  const weatherApiKey = "4b1ee5452a2e3f68205153f28bf93927"; 
   const DEBOUNCE_DELAY = 500;
   const WEATHER_TIMEOUT_MS = 8000;
-  const MAX_RETRIES = 2;
+  const MAX_RETRIES = 100;
 
   // --- Utility Functions ---
   function debounce(func, delay) {
@@ -59,23 +64,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks() {
-    incompleteTasks = [];
-    completedTasks = [];
-        tasks.forEach((task,index)=>{
-            if (task.completed){
-                completedTasks.push(task)
-            }
-            else{
-                incompleteTasks.push(task)
-            }
-        })
-        tasks = [];
+    let incompleteTasks = [];
+    let completedTasks = [];
+    tasks.forEach((task, index) => {
+      if (task.completed) completedTasks.push(task);
+      else incompleteTasks.push(task);
+    });
+    tasks = [...incompleteTasks, ...completedTasks];
 
-        tasks = [...incompleteTasks,...completedTasks]
     taskList.innerHTML = "";
-    document.querySelector("#filter-active").innerHTML = `Active [${incompleteTasks.length}]`
-    document.querySelector("#filter-completed").innerHTML = `Completed [${completedTasks.length}]`
-        const filteredTasks = tasks.filter((task) => {
+    // Check if filter buttons exist before updating their text
+    const filterActiveBtn = document.querySelector("#filter-active");
+    const filterCompletedBtn = document.querySelector("#filter-completed");
+    if (filterActiveBtn) filterActiveBtn.innerHTML = `Active [${incompleteTasks.length}]`;
+    if (filterCompletedBtn) filterCompletedBtn.innerHTML = `Completed [${completedTasks.length}]`;
+
+    const filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
       return true;
@@ -90,16 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    function addTask() {
-        const text = taskInput.value.trim();
-        // Removing the White Spaces around the text (excluding the middle one)
-        if (text) {
-            tasks.push({ text: text, completed: false });
-            // Checking if text is not Clear String.
-            renderTasks();
-            taskInput.value = "";
-        }
-    }
     filteredTasks.forEach((task) => {
       const originalIndex = tasks.findIndex((t) => t === task);
       taskList.appendChild(createTaskElement(task, originalIndex));
@@ -109,25 +103,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function addTask() {
     const text = taskInput.value.trim();
     if (!text) return;
-
     const newTask = { text, completed: false };
     tasks.push(newTask);
-
-    if (currentFilter === "all" || currentFilter === "active") {
-      const emptyState = taskList.querySelector(".task-empty-state");
-      if (emptyState) emptyState.remove();
-      taskList.appendChild(createTaskElement(newTask, tasks.length - 1));
-    }
-
     saveTasks();
-    taskInput.value = ""; 
-    renderTasks();      
+    taskInput.value = "";
+    renderTasks();
   }
 
   function deleteTask(index) {
-    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-    if (taskElement) taskElement.remove();
-
     tasks.splice(index, 1);
     saveTasks();
     renderTasks();
@@ -141,32 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
-    const taskElement = taskList.querySelector(`li[data-index='${index}']`);
-    if (taskElement) {
-      const taskText = taskElement.querySelector("span");
-      taskText.classList.toggle("completed", tasks[index].completed);
-
-      if (
-        (currentFilter === "active" && tasks[index].completed) ||
-        (currentFilter === "completed" && !tasks[index].completed)
-      ) {
-        taskElement.remove();
-        if (taskList.children.length === 0) renderTasks();
-      }
-    }
     saveTasks();
     renderTasks();
   }
 
   function enableInlineEdit(index, spanEl) {
     if (spanEl.parentElement.querySelector(".task-edit-input")) return;
-
     const originalText = tasks[index].text;
     const input = document.createElement("input");
     input.type = "text";
     input.value = originalText;
     input.className = "task-edit-input";
-
     spanEl.replaceWith(input);
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
@@ -195,10 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
         '<p class="loading-text">Enter a city to see the weather...</p>';
       return;
     }
-
     weatherInfo.innerHTML =
       '<p class="loading-text">Loading weather data...</p>';
-
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
       city
     )}&appid=${weatherApiKey}&units=metric`;
@@ -234,6 +200,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function fetchWeatherByCoords(lat, lon, attempt = 0) {
+    weatherInfo.innerHTML =
+      '<p class="loading-text">Loading weather data...</p>';
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          showWeatherError("Invalid API key.");
+          return;
+        }
+        throw new Error(`Server error (${response.status})`);
+      }
+
+      const data = await response.json();
+      displayWeather(data);
+    } catch (error) {
+      clearTimeout(id);
+      if (error.name === "AbortError") {
+        showWeatherError("Request timed out.", attempt);
+      } else {
+        showWeatherError("Weather data currently unavailable.", attempt);
+      }
+    }
+  }
+
   function showWeatherError(message, attempt = 0) {
     const canRetry = attempt < MAX_RETRIES;
     weatherInfo.innerHTML = `
@@ -242,7 +240,11 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     const retryBtn = document.getElementById("weather-retry-btn");
     if (retryBtn) retryBtn.addEventListener("click", () => {
-      fetchWeather(cityInput.value.trim(), attempt + 1);
+      if (navigator.geolocation && !cityInput.value) {
+        getLocationWeather();
+      } else {
+        fetchWeather(cityInput.value.trim(), attempt + 1);
+      }
     });
   }
 
@@ -257,39 +259,39 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  const debouncedFetchWeather = debounce(fetchWeather, DEBOUNCE_DELAY);
+  function getLocationWeather() {
+    if (!navigator.geolocation) {
+      weatherInfo.innerHTML = `<p class="error-text">Geolocation is not supported by your browser.</p>`;
+      return;
+    }
+    weatherInfo.innerHTML = `<p class="loading-text">Detecting your location...</p>`;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        weatherInfo.innerHTML = `<p class="error-text">Unable to get your location. Please allow location access and try again, or search for a city above.</p>`;
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
 
-  // --- Event Listeners ---
-  taskList.addEventListener("click", (e) => {
-    const action = e.target.dataset.action;
-    if (!action) return;
-    const li = e.target.closest(".task-item");
-    if (!li) return;
-    const index = parseInt(li.dataset.index, 10);
-    if (action === "delete") deleteTask(index);
-  });
-
-  taskList.addEventListener("change", (e) => {
-    if (e.target.dataset.action === "toggle" && e.target.type === "checkbox") {
-      const li = e.target.closest(".task-item");
-      if (!li) return;
-      toggleTaskCompletion(parseInt(li.dataset.index, 10));
+  // --- Weather Search Events ---
+  cityInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      fetchWeather(cityInput.value.trim());
     }
   });
-
-  taskList.addEventListener("dblclick", (e) => {
-    if (e.target.dataset.action === "edit" && e.target.tagName === "SPAN") {
-      const li = e.target.closest(".task-item");
-      if (!li) return;
-      enableInlineEdit(parseInt(li.dataset.index, 10), e.target);
-    }
+  searchWeatherBtn.addEventListener("click", () => {
+    fetchWeather(cityInput.value.trim());
   });
+  getLocationBtn.addEventListener("click", getLocationWeather);
 
+  // --- Task Events ---
   addTaskBtn.addEventListener("click", addTask);
   taskInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addTask();
   });
-
   clearAllBtn.addEventListener("click", clearAllTasks);
 
   filterBtns.forEach((btn) => {
@@ -301,36 +303,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  cityInput.addEventListener("input", () =>
-    debouncedFetchWeather(cityInput.value.trim())
-  );
-  searchWeatherBtn.addEventListener("click", () => {
-    clearTimeout(weatherSearchTimeout);
-    fetchWeather(cityInput.value.trim());
-  });
-  cityInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      clearTimeout(weatherSearchTimeout);
-      fetchWeather(cityInput.value.trim());
+  taskList.addEventListener("click", (e) => {
+    const li = e.target.closest("li.task-item");
+    if (!li) return;
+    const index = Number(li.dataset.index);
+    if (e.target.dataset.action === "toggle") {
+      toggleTaskCompletion(index);
+    } else if (e.target.dataset.action === "delete") {
+      deleteTask(index);
+    } else if (e.target.dataset.action === "edit") {
+      enableInlineEdit(index, e.target);
     }
   });
 
-  themeToggle.addEventListener("click", () =>
-    document.body.classList.toggle("dark-theme")
-  );
-
-  const navLinks = document.querySelectorAll(".nav-link");
-  navLinks.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      navLinks.forEach((l) => l.classList.remove("active"));
-      e.currentTarget.classList.add("active");
+  // --- Theme Toggle ---
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-theme");
     });
-  });
+  }
 
+  // --- Init ---
   function init() {
     renderTasks();
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-    fetchWeather("London");
+    getLocationWeather(); // Show local weather on page load
   }
 
   init();
