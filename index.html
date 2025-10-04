@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fsoc-Medium</title> 
@@ -58,38 +59,60 @@
             background: #e0f7fa;
         }
     </style>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Open Source Software Club | Task Manager and Weather Dashboard" />
+    <meta name="author" content="AIT OSS Club" />
+
+    <!-- Descriptive browser tab title -->
+    <title>Plan your tasks and wheater reports</title>
+
+    <!-- Custom favicon -->
+    <link rel="icon" href="favicon.ico.ico" type="image/x-icon" />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
     <header>
         <nav>
-            <div class="logo">Fsoc-Medium</div>
             <ul class="nav-links">
-                <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
-                <li><a href="about.html" class="nav-link">About</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="index.html" class="nav-link active">Dashboard</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+                <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
             </ul>
-            <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
         </nav>
     </header>
+
     <main class="container">
+
         <section class="card task-manager" id="dashboard">
             <h2>My Tasks <span class="shortcut hint"></span></h2>
+
+        <!-- Task Manager Section -->
+        <section class="card task-manager">
+            <h2>My Tasks</h2>
+
             <div class="task-input-container">
-                <input type="text" id="task-input" placeholder="Ready to crush your next goal?">
+                <input type="text" id="task-input" placeholder="e.g., Finish my project">
                 <button id="add-task-btn">Add Task</button>
             </div>
             <div class="task-filters">
                 <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn"  id="filter-active" data-filter="active">Active</button>
-                <button class="filter-btn" id="filter-completed" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
             </div>
-            <ul id="task-list">
-            </ul>
-            <div class="task-actions">
-                <button id="sort-tasks-btn">Sort A-Z</button>
-                <button id="clear-all-btn">Clear All</button>
-            </div>
+            <ul id="task-list"></ul>
+            <button id="clear-all-btn">Clear All</button>
         </section>
+
     </main>
 <div class="shortcut-modal" id="shortcut-modal" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
     <h3 id="shortcut-title">Keyboard Shortcuts</h3>
@@ -201,17 +224,40 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
 
+=======
+
+        <!-- Weather Widget Section -->
+
         <section class="card weather-widget">
             <h2>Weather Report</h2>
-            <div class="weather-search" style="justify-content: center;">
-                <button id="get-location-btn">Get My Location Weather</button>
+            <div class="weather-search">
+                <input type="text" id="city-input" placeholder="Enter city name">
+                <button id="search-weather-btn">Search</button>
             </div>
-            <div id="weather-info" role="status" aria-live="polite">
+            <div id="weather-info">
                 <p class="loading-text">Search for a city to see the weather...</p>
             </div>
         </section>
+
     </script>
     <script src="script.js"></script>
     <script src="weather.js"></script>
     </body>
     </html>
+
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Open Source Software Club. All rights reserved.</p>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
+
