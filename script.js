@@ -165,6 +165,50 @@ document.addEventListener("DOMContentLoaded", () => {
     return validTask && validDate;
   }
 
+
+  function updateTaskProgressBar() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+ 
+    const bar = document.getElementById("task-progress-bar");
+    if (bar) {
+      bar.style.width = percent + "%";
+      if (percent < 30) {
+        bar.style.background = "linear-gradient(90deg,#e94560 0%,#f9d423 100%)";
+      } else if (percent < 70) {
+        bar.style.background = "linear-gradient(90deg,#f9d423 0%,#4f8cff 100%)";
+      } else {
+        bar.style.background = "linear-gradient(90deg,#28a745 0%,#4f8cff 100%)";
+      }
+    }
+
+    const percentLabel = document.getElementById("task-progress-percent");
+    if (percentLabel) percentLabel.textContent = percent + "%";
+
+    const summary = document.getElementById("task-progress-summary");
+    if (summary) summary.textContent = `${completed} of ${total} tasks completed`;
+
+    const ring = document.getElementById("task-progress-ring");
+    const ringLabel = document.getElementById("task-progress-ring-label");
+    if (ring && ringLabel) {
+      const radius = 26;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference * (1 - percent / 100);
+      ring.setAttribute("stroke-dasharray", `${circumference}`);
+      ring.setAttribute("stroke-dashoffset", `${offset}`);
+      if (percent < 30) {
+        ring.setAttribute("stroke", "#e94560");
+      } else if (percent < 70) {
+        ring.setAttribute("stroke", "#f9d423");
+      } else {
+        ring.setAttribute("stroke", "#28a745");
+      }
+      ringLabel.textContent = percent + "%";
+    }
+  }
+
   // --- Task Data Model ---
   function addTask() {
     if (!validateForm()) return;
@@ -184,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
     taskInput.classList.remove("input-valid");
     dueDateInput.classList.remove("input-valid");
     renderTasks();
+    updateTaskProgressBar();
   }
 
   function saveTasks() {
@@ -198,18 +243,21 @@ document.addEventListener("DOMContentLoaded", () => {
     tasks.splice(index, 1);
     saveTasks();
     renderTasks();
+    updateTaskProgressBar();
   }
 
   function clearAllTasks() {
     tasks = [];
     saveTasks();
     renderTasks();
+    updateTaskProgressBar();
   }
 
   function toggleTaskCompletion(index) {
     tasks[index].completed = !tasks[index].completed;
     saveTasks();
     renderTasks();
+    updateTaskProgressBar();
   }
 
   function enableInlineEdit(index, spanEl) {
@@ -517,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         if (response.status === 404) {
-          showWeatherError("City not found.");
+          showWeatherError(`We couldn't find "${city}". Please check the spelling or try another city.`);
           return;
         }
         throw new Error(`Server error (${response.status})`);
@@ -733,6 +781,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Init ---
   function init() {
     renderTasks();
+    updateTaskProgressBar();
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
     getLocationWeather();
   }
