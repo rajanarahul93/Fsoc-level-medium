@@ -93,6 +93,22 @@
                         Completed
                     </button>
                 </div>
+                <div class="task-progress-container">
+                    <div class="task-progress-bar-bg">
+                        <div class="task-progress-bar-fill" id="task-progress-bar"></div>
+                    </div>
+                    <div class="task-progress-info">
+                        <span id="task-progress-percent" class="task-progress-percent">0%</span>
+                        <span id="task-progress-summary" class="task-progress-summary"></span>
+                        <div class="task-progress-ring">
+                            <svg width="60" height="60">
+                                <circle cx="30" cy="30" r="26" stroke="#e0e0e0" stroke-width="6" fill="none"/>
+                                <circle id="task-progress-ring" cx="30" cy="30" r="26" stroke="#4f8cff" stroke-width="6" fill="none" stroke-linecap="round" />
+                            </svg>
+                            <span id="task-progress-ring-label" class="task-progress-ring-label">0%</span>
+                        </div>
+                    </div>
+                </div>
                 <ul id="task-list"></ul>
                 <div class="task-actions">
                     <button id="sort-tasks-btn">Sort A-Z</button>
