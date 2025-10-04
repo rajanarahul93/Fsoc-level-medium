@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
   let currentFilter = "all";
-  let weatherSearchTimeout = null;
 
   // --- Sorting State ---
   let sortState = JSON.parse(localStorage.getItem("sortState")) || {
@@ -60,12 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
     dueDateInputError.style.display = "none";
     dueDateInput.parentNode.insertBefore(dueDateInputError, dueDateInput.nextSibling);
   }
+  
+  // Keep reference to the currently active fetch's AbortController so we can cancel it
+  let currentWeatherController = null;
 
   // --- Utility Functions ---
   function debounce(func, delay) {
+    let timer = null;
     return function (...args) {
-      clearTimeout(weatherSearchTimeout);
-      weatherSearchTimeout = setTimeout(() => func.apply(this, args), delay);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
     };
   }
 
@@ -231,14 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateTaskProgressBar();
   }
 
-  function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }
-
-  function saveSortState() {
-    localStorage.setItem("sortState", JSON.stringify(sortState));
-  }
-
   function deleteTask(index) {
     tasks.splice(index, 1);
     saveTasks();
@@ -321,8 +318,8 @@ document.addEventListener("DOMContentLoaded", () => {
       case "status":
         sorted.sort((a, b) =>
           sortState.direction === "asc"
-            ? a.completed - b.completed
-            : b.completed - a.completed
+            ? Number(a.completed) - Number(b.completed)
+            : Number(b.completed) - Number(a.completed)
         );
         break;
       case "dueDate":
@@ -344,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderTasks() {
     let incompleteTasks = [];
     let completedTasks = [];
-    tasks.forEach((task, index) => {
+    tasks.forEach((task) => {
       if (task.completed) completedTasks.push(task);
       else incompleteTasks.push(task);
     });
@@ -403,7 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
     header.style.padding = "0.5rem 0.5rem";
     taskList.appendChild(header);
 
-    filteredTasks.forEach((task, idx) => {
+    filteredTasks.forEach((task) => {
       const originalIndex = tasks.findIndex((t) => t === task);
       const li = document.createElement("li");
       li.className = "task-item";
@@ -433,9 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
       checkbox.dataset.action = "toggle";
       checkbox.style.marginRight = "0.5rem";
 
-  const taskText = document.createElement("span");
-  const qval = taskSearch ? taskSearch.value.trim() : "";
-  taskText.innerHTML = qval ? highlightMatch(task.text, qval) : task.text;
+      const taskText = document.createElement("span");
+      const qval = taskSearch ? taskSearch.value.trim() : "";
+      taskText.innerHTML = qval ? highlightMatch(task.text, qval) : task.text;
       if (task.completed) taskText.classList.add("completed");
       taskText.dataset.action = "edit";
 
@@ -540,24 +537,39 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Weather Functions ---
+  function cancelOngoingWeatherRequest() {
+    if (currentWeatherController) {
+      try {
+        currentWeatherController.abort();
+      } catch (e) {
+        // ignore
+      }
+      currentWeatherController = null;
+    }
+  }
+
   async function fetchWeather(city, attempt = 0) {
     if (!city) {
-      weatherInfo.innerHTML =
-        '<p class="loading-text">Enter a city to see the weather...</p>';
+      weatherInfo.innerHTML = '<p class="loading-text">Enter a city to see the weather...</p>';
       return;
     }
-    weatherInfo.innerHTML =
-      '<p class="loading-text">Loading weather data...</p>';
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-      city
-    )}&appid=${weatherApiKey}&units=metric`;
 
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+    // Cancel any ongoing request to avoid race conditions
+    cancelOngoingWeatherRequest();
+
+    weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`;
+
+    // Create a new controller for this request
+    currentWeatherController = new AbortController();
+    const controller = currentWeatherController;
+    const timeoutId = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
 
     try {
       const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(id);
+      clearTimeout(timeoutId);
+      // If this request was aborted after creation, avoid using response
+      if (controller.signal.aborted) return;
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -574,26 +586,37 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       displayWeather(data);
     } catch (error) {
-      clearTimeout(id);
+      clearTimeout(timeoutId);
       if (error.name === "AbortError") {
-        showWeatherError("Request timed out.", attempt);
+        // If aborted because a new request started, do nothing special
+        if (attempt < MAX_RETRIES) {
+          // Only show retry UI if it's a genuine timeout (not immediate abort due to another fetch)
+          showWeatherError("Request timed out.", attempt);
+        }
       } else {
         showWeatherError("Weather data currently unavailable.", attempt);
       }
+    } finally {
+      // Clear controller only if it's this request's controller
+      if (currentWeatherController === controller) currentWeatherController = null;
     }
   }
 
   async function fetchWeatherByCoords(lat, lon, attempt = 0) {
-    weatherInfo.innerHTML =
-      '<p class="loading-text">Loading weather data...</p>';
+    // Cancel any ongoing request to avoid race conditions
+    cancelOngoingWeatherRequest();
+
+    weatherInfo.innerHTML = '<p class="loading-text">Loading weather data...</p>';
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
 
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+    currentWeatherController = new AbortController();
+    const controller = currentWeatherController;
+    const timeoutId = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
 
     try {
       const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(id);
+      clearTimeout(timeoutId);
+      if (controller.signal.aborted) return;
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -606,12 +629,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       displayWeather(data);
     } catch (error) {
-      clearTimeout(id);
+      clearTimeout(timeoutId);
       if (error.name === "AbortError") {
-        showWeatherError("Request timed out.", attempt);
+        if (attempt < MAX_RETRIES) showWeatherError("Request timed out.", attempt);
       } else {
         showWeatherError("Weather data currently unavailable.", attempt);
       }
+    } finally {
+      if (currentWeatherController === controller) currentWeatherController = null;
     }
   }
 
@@ -660,14 +685,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Weather Search Events ---
+  // Debounced fetch so API is only called after user stops typing
+  const debouncedFetchWeather = debounce(() => {
+    // don't call if city is empty
+    const city = cityInput.value.trim();
+    if (city === "") {
+      // If the input is empty, we cancel ongoing request and show a hint
+      cancelOngoingWeatherRequest();
+      weatherInfo.innerHTML = '<p class="loading-text">Enter a city to see the weather...</p>';
+      return;
+    }
+    fetchWeather(city);
+  }, DEBOUNCE_DELAY);
+
+  // Use input event (better than keydown for composition/IME)
+  cityInput.addEventListener("input", debouncedFetchWeather);
+
+  // Enter should immediately fetch (no debounce)
   cityInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
+      // cancel pending debounced call and run immediate fetch
       fetchWeather(cityInput.value.trim());
     }
   });
+
   searchWeatherBtn.addEventListener("click", () => {
     fetchWeather(cityInput.value.trim());
   });
+
   getLocationBtn.addEventListener("click", getLocationWeather);
 
   // --- Task Events ---
@@ -783,6 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
     updateTaskProgressBar();
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    // Show local weather on page load (will prompt for geolocation)
     getLocationWeather();
   }
 
