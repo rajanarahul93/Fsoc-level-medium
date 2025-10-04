@@ -1,263 +1,159 @@
 <!doctype html>
 <html lang="en">
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fsoc-Medium</title> 
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <style>
-        .task-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: center;
-        }
-        .task-actions button {
-            flex: 1;
-            padding: 0.7rem 2.2rem;
-        }
-        .task-actions #clear-all-btn {
-            margin: 0;
-        }
-        .shortcut-modal{
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%,-50%);
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            z-index: 1000;
-            max-width: 400px;
-            width: 90%;
-        }
-        .shortcut-modal.active{
-            display: block;
-        }
-        .shortcut-modal h3{
-            margin: top 0; 
-        }
-        .shortcut-modal ul{
-            padding-left: 1rem;
-        }
-        .shortcut-hint{
-            font-size: 0.8rem;
-            color: #666;
-            margin-left: 0.5rem;
-        }
-        #task-list li{
-            outline: none;
-        }
-        #task-list li:focus{
-            background: #e0f7fa;
-        }
-    </style>
-
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Open Source Software Club | Task Manager and Weather Dashboard" />
-    <meta name="author" content="AIT OSS Club" />
-
-    <!-- Descriptive browser tab title -->
-    <title>Plan your tasks and wheater reports</title>
-
-    <!-- Custom favicon -->
-    <link rel="icon" href="favicon.ico.ico" type="image/x-icon" />
-
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css" />
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-</head>
-<body>
-    <header>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="index.html" class="nav-link active">Dashboard</a></li>
-                <li><a href="index.html#about" class="nav-link">About</a></li>
-                <li><a href="contact.html" class="nav-link">Contact</a></li>
-                <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-
-        <section class="card task-manager" id="dashboard">
-            <h2>My Tasks <span class="shortcut hint"></span></h2>
-
-        <!-- Task Manager Section -->
-        <section class="card task-manager">
-            <h2>My Tasks</h2>
-
-            <div class="task-input-container">
-                <input type="text" id="task-input" placeholder="e.g., Finish my project">
-                <button id="add-task-btn">Add Task</button>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Fsoc-Medium</title>
+        <link rel="stylesheet" href="style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/a076d05399.js"
+            crossorigin="anonymous"
+        ></script>
+        <style>
+            .task-actions {
+                display: flex;
+                gap: 1rem;
+                margin-top: 1.5rem;
+                justify-content: center;
+            }
+            .task-actions button {
+                flex: 1;
+                padding: 0.7rem 2.2rem;
+            }
+            .task-actions #clear-all-btn {
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <div class="logo">Fsoc-Medium</div>
+                <ul class="nav-links">
+                    <li>
+                        <a href="#dashboard" class="nav-link active"
+                            >Dashboard</a
+                        >
+                    </li>
+                    <li><a href="about.html" class="nav-link">About</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <button id="theme-toggle" class="theme-btn">
+                    Toggle Theme
+                </button>
+            </nav>
+        </header>
+        <main class="container">
+            <section class="card task-manager">
+                <h2>My Tasks</h2>
+                <div class="task-input-container">
+                    <input
+                        type="text"
+                        id="task-input"
+                        placeholder="Ready to crush your next goal?"
+                    />
+                    <input
+                        type="date"
+                        id="due-date-input"
+                        placeholder="Due date"
+                        style="max-width: 160px;"
+                    />
+                    <button id="add-task-btn">Add Task</button>
+                </div>
+                <div class="task-search-area">
+                    <input type="text" id="task-search" placeholder="Search tasks..." />
+                    <div class="search-controls">
+                        <button id="search-btn">Search</button>
+                        <button id="clear-search-btn">Clear</button>
+                        <span id="search-count"></span>
+                    </div>
+                </div>
+                <div class="task-filters">
+                    <button class="filter-btn active" data-filter="all">
+                        All
+                    </button>
+                    <button
+                        class="filter-btn"
+                        id="filter-active"
+                        data-filter="active"
+                    >
+                        Active
+                    </button>
+                    <button
+                        class="filter-btn"
+                        id="filter-completed"
+                        data-filter="completed"
+                    >
+                        Completed
+                    </button>
+                </div>
+                <div class="task-progress-container">
+                    <div class="task-progress-bar-bg">
+                        <div class="task-progress-bar-fill" id="task-progress-bar"></div>
+                    </div>
+                    <div class="task-progress-info">
+                        <span id="task-progress-percent" class="task-progress-percent">0%</span>
+                        <span id="task-progress-summary" class="task-progress-summary"></span>
+                        <div class="task-progress-ring">
+                            <svg width="60" height="60">
+                                <circle cx="30" cy="30" r="26" stroke="#e0e0e0" stroke-width="6" fill="none"/>
+                                <circle id="task-progress-ring" cx="30" cy="30" r="26" stroke="#4f8cff" stroke-width="6" fill="none" stroke-linecap="round" />
+                            </svg>
+                            <span id="task-progress-ring-label" class="task-progress-ring-label">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <ul id="task-list"></ul>
+                <div class="task-actions">
+                    <button id="sort-tasks-btn">Sort A-Z</button>
+                    <button id="export-data-btn">Export Data</button>
+                    <button id="import-data-btn">Import Data</button>
+                    <button id="clear-all-btn">Clear All</button>
+                </div>
+                <input
+                    type="file"
+                    id="import-file-input"
+                    accept=".json"
+                    style="display: none"
+                />
+            </section>
+            <section class="card weather-widget">
+                <h2>Weather Report</h2>
+                <div class="weather-search" style="justify-content: center">
+                    <input
+                        type="text"
+                        id="city-input"
+                        placeholder="Search city..."
+                    />
+                    <button id="search-weather-btn">Search</button>
+                    <button id="get-location-btn">
+                        Get My Location Weather
+                    </button>
+                </div>
+                <div id="weather-info" role="status" aria-live="polite">
+                    <p class="loading-text">
+                        Search for a city or use your location to see the
+                        weather...
+                    </p>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>
+                &copy; <span id="year"></span> Fsoc-Medium Project. All rights
+                reserved.
+            </p>
+            <div class="footer-nav">
+                <a href="index.html">Dashboard</a> |
+                <a href="about.html">About</a> | <a href="#contact">Contact</a>
             </div>
-            <div class="task-filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="active">Active</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-            </div>
-            <ul id="task-list"></ul>
-            <button id="clear-all-btn">Clear All</button>
-        </section>
-
-    </main>
-<div class="shortcut-modal" id="shortcut-modal" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
-    <h3 id="shortcut-title">Keyboard Shortcuts</h3>
-    <form id="shortcut-form">
-      <ul>
-        <li>Add Task: <input type="text" id="key-add" maxlength="1"></li>
-        <li>Search Task: <input type="text" id="key-search" maxlength="1"></li>
-        <li>Next Task: <input type="text" id="key-next" maxlength="1"></li>
-        <li>Previous Task: <input type="text" id="key-prev" maxlength="1"></li>
-        <li>Show Help: <input type="text" id="key-help" maxlength="1"></li>
-      </ul>
-      <button type="submit">Save Shortcuts</button>
-    </form>
-    <button id="close-shortcut-modal">Close</button>
-  </div>
-  <footer>
-    <p>&copy; <span id="year"></span> Fsoc-Medium Project. All rights reserved.</p>
-  </footer>
-
-  <script>
-    const taskInput = document.getElementById('task-input');
-    const addTaskBtn = document.getElementById('add-task-btn');
-    const taskList = document.getElementById('task-list');
-    const shortcutModal = document.getElementById('shortcut-modal');
-    const defaultShortcuts = {
-      add: 'a',
-      search: 's',
-      next: 'n',
-      prev: 'p',
-      help: '?'
-    };
-    let shortcuts = JSON.parse(localStorage.getItem('shortcuts')) || defaultShortcuts;
-    document.addEventListener('keydown', (e) => {
-      const key = e.key.toLowerCase();
-
-      if (key === shortcuts.add) {
-        e.preventDefault();
-        taskInput.focus();
-      }
-      if (key === shortcuts.search) {
-        e.preventDefault();
-        taskInput.focus();
-      }
-      if (key === shortcuts.next) {
-        e.preventDefault();
-        navigateTasks('next');
-      }
-      if (key === shortcuts.prev) {
-        e.preventDefault();
-        navigateTasks('prev');
-      }
-      if (key === shortcuts.help.toLowerCase()) {
-        e.preventDefault();
-        shortcutModal.classList.toggle('active');
-        fillFormWithShortcuts();
-      }
-      if (key === 'escape') {
-        shortcutModal.classList.remove('active');
-      }
-      if (key === 'enter' && document.activeElement === taskInput) {
-        addTaskBtn.click();
-      }
-    });
-    addTaskBtn.addEventListener('click', () => {
-      if (taskInput.value.trim() !== "") {
-        const li = document.createElement('li');
-        li.textContent = taskInput.value.trim();
-        li.tabIndex = 0; // focusable
-        taskList.appendChild(li);
-        taskInput.value = "";
-      }
-    });
-    function navigateTasks(direction) {
-      const tasks = document.querySelectorAll('#task-list li');
-      if (!tasks.length) return;
-
-      let currentIndex = Array.from(tasks).indexOf(document.activeElement);
-      if (direction === 'next') currentIndex++;
-      if (direction === 'prev') currentIndex--;
-
-      if (currentIndex >= tasks.length) currentIndex = 0;
-      if (currentIndex <script 0) currentIndex = tasks.length - 1;
-
-      tasks[currentIndex].focus();
-    }
-    document.getElementById('close-shortcut-modal').addEventListener('click', () => {
-      shortcutModal.classList.remove('active');
-    });
- function fillFormWithShortcuts() {
-      document.getElementById('key-add').value = shortcuts.add;
-      document.getElementById('key-search').value = shortcuts.search;
-      document.getElementById('key-next').value = shortcuts.next;
-      document.getElementById('key-prev').value = shortcuts.prev;
-      document.getElementById('key-help').value = shortcuts.help;
-    }
-    document.getElementById('shortcut-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      shortcuts = {
-        add: document.getElementById('key-add').value.toLowerCase() || shortcuts.add,
-        search: document.getElementById('key-search').value.toLowerCase() || shortcuts.search,
-        next: document.getElementById('key-next').value.toLowerCase() || shortcuts.next,
-        prev: document.getElementById('key-prev').value.toLowerCase() || shortcuts.prev,
-        help: document.getElementById('key-help').value || shortcuts.help
-      };
-      localStorage.setItem('shortcuts', JSON.stringify(shortcuts));
-      alert('Shortcuts updated!');
-      shortcutModal.classList.remove('active');
-    });
-document.getElementById('year').textContent = new Date().getFullYear();
-
-
-=======
-
-        <!-- Weather Widget Section -->
-
-        <section class="card weather-widget">
-            <h2>Weather Report</h2>
-            <div class="weather-search">
-                <input type="text" id="city-input" placeholder="Enter city name">
-                <button id="search-weather-btn">Search</button>
-            </div>
-            <div id="weather-info">
-                <p class="loading-text">Search for a city to see the weather...</p>
-            </div>
-        </section>
-
-    </script>
-    <script src="script.js"></script>
-    <script src="weather.js"></script>
+        </footer>
+        <script src="script.js"></script>
     </body>
-    </html>
-
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2025 Open Source Software Club. All rights reserved.</p>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="contact.html" class="nav-link">Contact</a></li>
-            </ul>
-        </nav>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="script.js"></script>
-</body>
 </html>
-
