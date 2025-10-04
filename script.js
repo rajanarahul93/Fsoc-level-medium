@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const yearSpan = document.getElementById("year");
 
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  let tagRegistry = JSON.parse(localStorage.getItem("tags")) || {};
+  let activeTagFilter = null;
   let currentFilter = "all";
 
   // --- Sorting State ---
@@ -118,6 +120,25 @@ document.addEventListener("DOMContentLoaded", () => {
   function saveSortState() {
     localStorage.setItem("sortState", JSON.stringify(sortState));
   }
+
+  function saveTags() {
+    localStorage.setItem("tags", JSON.stringify(tagRegistry));
+  }
+
+  function normalizeTask(t) {
+    return {
+      text: t.text || "",
+      description: t.description || "",
+      tags: Array.isArray(t.tags) ? t.tags : [],
+      completed: !!t.completed,
+      created: t.created || Date.now(),
+      priority: typeof t.priority === 'number' ? t.priority : 2,
+      dueDate: t.dueDate || null
+    };
+  }
+
+  tasks = tasks.map(normalizeTask);
+  saveTasks();
 
   // --- Validation Functions ---
   function validateTaskInput() {
@@ -219,8 +240,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!validateForm()) return;
     const text = taskInput.value.trim();
     const dueDate = dueDateInput.value ? dueDateInput.value : null;
+    const rawTags = document.getElementById('task-tags') ? document.getElementById('task-tags').value : '';
+    const cleaned = sanitizeTagInputValue(rawTags);
+    const tags = cleaned.split(/\s+/).filter(Boolean);
+    tags.forEach(tag => { tagRegistry[tag] = (tagRegistry[tag] || 0) + 1; });
+    saveTags();
     const newTask = {
       text,
+      description: '',
+      tags,
       completed: false,
       created: Date.now(),
       priority: 2,
@@ -228,24 +256,54 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     tasks.push(newTask);
     saveTasks();
+    // if a tag filter is active but the new task doesn't match it, clear the filter so the task is visible
+    if (activeTagFilter) {
+      const matchesFilter = Array.isArray(newTask.tags) && newTask.tags.includes(activeTagFilter);
+      if (!matchesFilter) {
+        activeTagFilter = null;
+        const sel = document.getElementById('tag-filter-select');
+        if (sel) sel.value = '';
+      }
+    }
     taskInput.value = "";
     dueDateInput.value = "";
+    if (document.getElementById('task-tags')) document.getElementById('task-tags').value = '';
     taskInput.classList.remove("input-valid");
     dueDateInput.classList.remove("input-valid");
+    renderPopularTags();
     renderTasks();
     updateTaskProgressBar();
   }
 
   function deleteTask(index) {
+    // decrement tag counts for removed task
+    const t = tasks[index];
+    if (t && Array.isArray(t.tags)) {
+      t.tags.forEach(tag => {
+        if (tagRegistry[tag]) {
+          tagRegistry[tag] = Math.max(0, tagRegistry[tag] - 1);
+          if (tagRegistry[tag] === 0) delete tagRegistry[tag];
+        }
+      });
+      saveTags();
+    }
     tasks.splice(index, 1);
     saveTasks();
+    
+    rebuildTagRegistryFromTasks();
+    // update popular tags/dropdown then re-render list
+    renderPopularTags();
     renderTasks();
     updateTaskProgressBar();
   }
 
   function clearAllTasks() {
+    // clear tasks and reset tag registry
     tasks = [];
+    tagRegistry = {};
+    saveTags();
     saveTasks();
+    renderPopularTags();
     renderTasks();
     updateTaskProgressBar();
   }
@@ -350,6 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let filteredTasks = tasks.filter((task) => {
       if (currentFilter === "active") return !task.completed;
       if (currentFilter === "completed") return task.completed;
+      if (activeTagFilter) return task.tags && task.tags.includes(activeTagFilter);
       return true;
     });
 
@@ -445,17 +504,38 @@ document.addEventListener("DOMContentLoaded", () => {
       const dateObj = new Date(task.created);
       dateCell.textContent = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      // Due Date
+      // Tags badges
+      const tagsCell = document.createElement('span');
+      if (Array.isArray(task.tags)) {
+        task.tags.forEach(tg => {
+          const badge = document.createElement('span');
+          badge.className = 'tag-badge';
+          const tc = getTagColors(tg);
+          badge.style.background = tc.bg;
+          badge.style.color = tc.color;
+          badge.textContent = tg;
+          badge.title = `Filter by ${tg}`;
+          badge.addEventListener('click', () => {
+            activeTagFilter = tg;
+            renderTasks();
+          });
+          tagsCell.appendChild(badge);
+          tagsCell.appendChild(document.createTextNode(' '));
+        });
+      }
+
+      // Delete
       const dueDateCell = document.createElement("span");
       dueDateCell.textContent = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "-";
       if (isOverdue) dueDateCell.classList.add("overdue-date");
 
-      // Priority
-      const priorityCell = document.createElement("span");
-      let priorityText = "Medium";
-      if (task.priority === 1) priorityText = "High";
-      if (task.priority === 3) priorityText = "Low";
-      priorityCell.textContent = priorityText;
+  // Priority
+  // create priority cell element
+  const priorityCell = document.createElement("span");
+  let priorityText = "Medium";
+  if (task.priority === 1) priorityText = "High";
+  if (task.priority === 3) priorityText = "Low";
+  priorityCell.textContent = priorityText;
 
       // Status
       const statusCell = document.createElement("span");
@@ -473,6 +553,11 @@ document.addEventListener("DOMContentLoaded", () => {
         descSpan.className = "task-desc";
         descSpan.innerHTML = qval ? highlightMatch(`(${task.description})`, qval) : `(${task.description})`;
         titleCell.appendChild(descSpan);
+      }
+
+      // append tags into the title cell so layout columns remain stable
+      if (tagsCell && tagsCell.childElementCount > 0) {
+        titleCell.appendChild(tagsCell);
       }
 
       li.appendChild(titleCell);
@@ -501,6 +586,281 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Tag helpers
+  function getTagColors(str) {
+    // deterministic hue from string
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    const hue = Math.abs(hash) % 360;
+    // choose saturation/lightness tuned for readability
+    let sat = 70;
+    let light = 50;
+    // make yellows lighter and more readable
+    if (hue >= 30 && hue <= 70) {
+      sat = 78;
+      light = 62; // lighter yellow
+    }
+    // make reds slightly lighter
+    if (hue <= 15 || hue >= 345) {
+      sat = 72;
+      light = 56; // softer red
+    }
+    // slightly desaturate greens/blues for better contrast
+    if ((hue > 70 && hue < 160) || (hue > 200 && hue < 280)) {
+      sat = 65;
+      light = 52;
+    }
+    const bg = `hsl(${hue} ${sat}% ${light}%)`;
+    // determine readable text color
+    const textColor = light > 58 ? '#222' : '#fff';
+    return { bg, color: textColor };
+  }
+
+  function renderPopularTags() {
+    const popular = document.getElementById('popular-tags');
+    if (!popular) return;
+    popular.innerHTML = '';
+    const entries = Object.entries(tagRegistry).sort((a,b) => b[1]-a[1]).slice(0,8);
+    entries.forEach(([tag, count]) => {
+  const el = document.createElement('span');
+  el.className = 'tag-badge';
+  const tcolors = getTagColors(tag);
+  el.style.background = tcolors.bg;
+  el.style.color = tcolors.color;
+  el.textContent = `${tag} (${count})`;
+      el.addEventListener('click', () => { activeTagFilter = tag; renderTasks(); });
+      popular.appendChild(el);
+    });
+    // update active tag indicator
+    const activeWrap = document.getElementById('active-tag-filter');
+    if (activeWrap) activeWrap.textContent = activeTagFilter ? `Filtering: ${activeTagFilter}` : '';
+    // also update dropdown options
+    updateTagFilterOptions();
+  }
+
+  function updateTagFilterOptions() {
+    const sel = document.getElementById('tag-filter-select');
+    if (!sel) return;
+    // clear and repopulate
+    const prev = sel.value;
+    sel.innerHTML = '';
+    const noneOpt = document.createElement('option');
+    noneOpt.value = '';
+    noneOpt.textContent = '-- Filter by tag --';
+    sel.appendChild(noneOpt);
+    Object.entries(tagRegistry).sort((a,b)=> b[1]-a[1]).forEach(([tag,count]) => {
+      const o = document.createElement('option');
+      o.value = tag;
+      o.textContent = `${tag} (${count})`;
+      sel.appendChild(o);
+    });
+    // restore previous if still exists
+    if (prev && Array.from(sel.options).some(o=>o.value===prev)) sel.value = prev;
+  }
+
+  const tagFilterSelect = document.getElementById('tag-filter-select');
+  if (tagFilterSelect) {
+    tagFilterSelect.addEventListener('change', (e) => {
+      const val = e.target.value || null;
+      activeTagFilter = val;
+      renderTasks();
+    });
+  }
+
+  const clearTagFilterBtn = document.getElementById('clear-tag-filter-btn');
+  if (clearTagFilterBtn) {
+    clearTagFilterBtn.addEventListener('click', () => {
+      activeTagFilter = null;
+      const sel = document.getElementById('tag-filter-select');
+      if (sel) sel.value = '';
+      renderTasks();
+    });
+  }
+
+  // Tag suggestions (very simple: suggest existing tags that start with typed value)
+  function renderTagSuggestions(prefix) {
+    const wrap = document.getElementById('tag-suggestions');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    if (!prefix) return;
+    const lower = prefix.toLowerCase();
+    const matches = Object.keys(tagRegistry).filter(t => t.startsWith(lower)).slice(0,8);
+    matches.forEach(m => {
+      const el = document.createElement('span');
+      el.className = 'tag-suggestion-item';
+      el.textContent = m;
+      el.addEventListener('click', () => {
+        const input = document.getElementById('task-tags');
+        if (!input) return;
+        const parts = input.value.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
+        if (!parts.includes(m)) parts.push(m);
+        input.value = parts.join(' ');
+        
+        renderTagSuggestions('');
+      });
+      wrap.appendChild(el);
+    });
+  }
+
+  
+  function getCurrentTagPrefix() {
+    const input = document.getElementById('task-tags');
+    if (!input) return '';
+    const raw = input.value || '';
+    const parts = raw.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
+    return parts.length ? parts[parts.length-1].toLowerCase() : '';
+  }
+
+  
+  function sanitizeTagInputValue(val) {
+    // split into tokens, remove invalid chars, join with single space
+    const parts = val.split(/[\s,]+/).map(s => s.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()).filter(Boolean);
+    return parts.join(' ');
+  }
+
+  
+  const tagsInputEl = document.getElementById('task-tags');
+  if (tagsInputEl) {
+    tagsInputEl.addEventListener('input', (e) => {
+      const cleaned = sanitizeTagInputValue(e.target.value);
+      // If user typed something different, update the field
+      if (cleaned !== e.target.value.trim()) {
+        e.target.value = cleaned;
+      }
+      const prefix = getCurrentTagPrefix();
+      renderTagSuggestions(prefix);
+    });
+    // initialize suggestion area empty
+    tagsInputEl.addEventListener('focus', () => renderTagSuggestions(getCurrentTagPrefix()));
+    tagsInputEl.addEventListener('blur', () => setTimeout(() => renderTagSuggestions(''), 150));
+  }
+
+  // Tag management: rename and delete
+  function renameTag(oldTag, newTag) {
+    if (!oldTag || !newTag) return;
+    oldTag = oldTag.toLowerCase();
+    newTag = newTag.toLowerCase();
+    if (oldTag === newTag) return;
+    // Remap tags in tasks
+    tasks.forEach(t => {
+      if (!Array.isArray(t.tags)) return;
+      if (t.tags.includes(oldTag)) {
+        t.tags = t.tags.filter(x => x !== oldTag);
+        if (!t.tags.includes(newTag)) t.tags.push(newTag);
+      }
+    });
+    // Merge counts
+    const oldCount = tagRegistry[oldTag] || 0;
+    const newCount = tagRegistry[newTag] || 0;
+    const merged = oldCount + newCount;
+    if (merged > 0) tagRegistry[newTag] = merged;
+    delete tagRegistry[oldTag];
+    saveTags();
+    saveTasks();
+    renderPopularTags();
+    renderTagSuggestions(document.getElementById('task-tags') ? document.getElementById('task-tags').value : '');
+    renderTasks();
+  }
+
+  function deleteTag(tag) {
+    if (!tag) return;
+    tag = tag.toLowerCase();
+    if (!confirm(`Delete tag '${tag}' from all tasks? This cannot be undone.`)) return;
+    // Remove from registry
+    delete tagRegistry[tag];
+    // Remove tag from tasks
+    tasks.forEach(t => {
+      if (!Array.isArray(t.tags)) return;
+      t.tags = t.tags.filter(x => x !== tag);
+    });
+    saveTags();
+    saveTasks();
+    
+    rebuildTagRegistryFromTasks();
+    renderPopularTags();
+    renderTagSuggestions(document.getElementById('task-tags') ? document.getElementById('task-tags').value : '');
+    renderTasks();
+  }
+
+  function rebuildTagRegistryFromTasks() {
+    tagRegistry = {};
+    tasks.forEach(t => {
+      if (!Array.isArray(t.tags)) return;
+      t.tags.forEach(tag => {
+        const k = (typeof tag === 'string') ? tag.toLowerCase() : tag;
+        if (!k) return;
+        tagRegistry[k] = (tagRegistry[k] || 0) + 1;
+      });
+    });
+    saveTags();
+  }
+
+  function renderTagManager() {
+    const mgr = document.getElementById('tag-manager');
+    if (!mgr) return;
+    mgr.innerHTML = '';
+    const entries = Object.entries(tagRegistry).sort((a,b)=> b[1]-a[1]);
+    if (entries.length === 0) {
+      mgr.textContent = 'No tags created yet.';
+      return;
+    }
+    entries.forEach(([tag,count]) => {
+  const item = document.createElement('span');
+  item.className = 'tag-item';
+  const tcolors = getTagColors(tag);
+  item.style.background = tcolors.bg;
+  item.style.color = tcolors.color;
+
+      const label = document.createElement('input');
+      label.type = 'text';
+      label.value = tag;
+      label.title = `${count} tasks`;
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'tag-action-btn';
+      saveBtn.textContent = '✎';
+      saveBtn.title = 'Rename tag';
+      saveBtn.addEventListener('click', () => {
+        const newName = label.value.trim();
+        if (!newName) { alert('Tag name cannot be empty'); label.value = tag; return; }
+        if (newName.toLowerCase() === tag) return;
+        renameTag(tag, newName);
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'tag-action-btn';
+      delBtn.textContent = '🗑️';
+      delBtn.title = 'Delete tag';
+      delBtn.addEventListener('click', () => deleteTag(tag));
+
+      const countSpan = document.createElement('span');
+      countSpan.style.marginLeft = '0.4rem';
+      countSpan.style.fontWeight = '700';
+      countSpan.textContent = `(${count})`;
+
+      item.appendChild(label);
+      item.appendChild(countSpan);
+      item.appendChild(saveBtn);
+      item.appendChild(delBtn);
+      mgr.appendChild(item);
+    });
+  }
+
+  // Wire manage tags button
+  const manageTagsBtn = document.getElementById('manage-tags-btn');
+  if (manageTagsBtn) {
+    manageTagsBtn.addEventListener('click', () => {
+      const mgr = document.getElementById('tag-manager');
+      if (!mgr) return;
+      const shown = mgr.style.display !== 'none';
+      mgr.style.display = shown ? 'none' : 'flex';
+      if (!shown) renderTagManager();
+    });
+  }
+
+  // Initialize popular tags UI
+  renderPopularTags();
+
   // --- Export/Import Functions ---
   function exportTasks() {
     const dataStr = JSON.stringify(tasks, null, 2);
@@ -522,7 +882,13 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const imported = JSON.parse(e.target.result);
         if (Array.isArray(imported)) {
-          tasks = imported;
+          tasks = imported.map(normalizeTask);
+          
+          tagRegistry = {};
+          tasks.forEach(t => {
+            if (Array.isArray(t.tags)) t.tags.forEach(tag => tagRegistry[tag] = (tagRegistry[tag] || 0) + 1);
+          });
+          saveTags();
           saveTasks();
           renderTasks();
           alert("Tasks imported successfully!");
