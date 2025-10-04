@@ -1,84 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Open Source Software Club | Task Manager and Weather Dashboard" />
-  <meta name="author" content="AIT OSS Club" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Open Source Software Club | Task Manager and Weather Dashboard" />
+    <meta name="author" content="AIT OSS Club" />
 
-  <!-- ✅ Descriptive browser tab title -->
-  <title>Organize Tasks and get Weather Reports</title>
+    <!-- Descriptive browser tab title -->
+    <title>Plan Your Day: Tasks and Weather Dashboard</title>
 
-  <!-- ✅ Favicon (make sure this file actually exists!) -->
-  <!-- Preferred PNG format -->
-  <link rel="icon" type="image/png" href="./favicon.ico.ico"
-  <!-- ✅ Optional fallback (works even if relative path fails) -->
-  <!-- <link rel="icon" href="https://raw.githubusercontent.com/Yamistree/Fsoc-level-medium/main/assets/favicon.png" /> -->
+    <!-- Custom favicon -->
+    <link rel="icon" href="favicon.ico.ico" type="image/x-icon" />
 
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
-
 <body>
-  <header>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="index.html" class="nav-link active">Dashboard</a></li>
-        <li><a href="index.html#about" class="nav-link">About</a></li>
-        <li><a href="contact.html" class="nav-link">Contact</a></li>
-        <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
-      </ul>
-    </nav>
-  </header>
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active">Dashboard</a></li>
+                <li><a href="index.html#about" class="nav-link">About</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+                <button id="theme-toggle" class="theme-btn">Toggle Theme</button>
+            </ul>
+        </nav>
+    </header>
 
-  <main class="container">
-    <!-- Task Manager Section -->
-    <section class="card task-manager">
-      <h2>My Tasks</h2>
-      <div class="task-input-container">
-        <input type="text" id="task-input" placeholder="e.g., Finish my project">
-        <button id="add-task-btn">Add Task</button>
-      </div>
-      <div class="task-filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="active">Active</button>
-        <button class="filter-btn" data-filter="completed">Completed</button>
-      </div>
-      <ul id="task-list"></ul>
-      <button id="clear-all-btn">Clear All</button>
-    </section>
+    <main class="container">
+        <!-- Task Manager Section -->
+        <section class="card task-manager">
+            <h2>My Tasks</h2>
+            <div class="task-input-container">
+                <input type="text" id="task-input" placeholder="e.g., Finish my project">
+                <button id="add-task-btn">Add Task</button>
+            </div>
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+            <ul id="task-list"></ul>
+            <button id="clear-all-btn">Clear All</button>
+        </section>
 
-    <!-- Weather Widget Section -->
-    <section class="card weather-widget">
-      <h2>Weather Report</h2>
-      <div class="weather-search">
-        <input type="text" id="city-input" placeholder="Enter city name">
-        <button id="search-weather-btn">Search</button>
-      </div>
-      <div id="weather-info">
-        <p class="loading-text">Search for a city to see the weather...</p>
-      </div>
-    </section>
-  </main>
+        <!-- Weather Widget Section -->
+        <section class="card weather-widget">
+            <h2>Weather Report</h2>
+            <div class="weather-search">
+                <input type="text" id="city-input" placeholder="Enter city name">
+                <button id="search-weather-btn">Search</button>
+            </div>
+            <div id="weather-info">
+                <p class="loading-text">Search for a city to see the weather...</p>
+            </div>
+        </section>
+    </main>
 
-  <footer class="footer">
-    <p>&copy; 2025 Open Source Software Club. All rights reserved.</p>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="contact.html" class="nav-link">Contact</a></li>
-      </ul>
-    </nav>
-  </footer>
+    <footer class="footer">
+        <p>&copy; 2025 Open Source Software Club. All rights reserved.</p>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </footer>
 
-  <!-- Scripts -->
-  <script src="script.js"></script>
+    <!-- Scripts -->
+    <script src="script.js"></script>
 </body>
 </html>
