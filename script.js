@@ -517,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         if (response.status === 404) {
-          showWeatherError("City not found.");
+          showWeatherError(`We couldn't find "${city}". Please check the spelling or try another city.`);
           return;
         }
         throw new Error(`Server error (${response.status})`);
